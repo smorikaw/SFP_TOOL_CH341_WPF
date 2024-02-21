@@ -6,5 +6,7 @@ Even if you do not have the equipment at hand, you can examine the EEPROM inform
 - SFF-8636 REv 2.11
 - CMIS 5.2
 ---
+Build with Visual Stdio 2022 .Net 8.0
+---
  ### need CH341 driver and DLL from
  https://www.wch-ic.com/downloads/CH341PAR_ZIP.html
