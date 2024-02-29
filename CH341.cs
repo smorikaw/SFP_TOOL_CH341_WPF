@@ -36,6 +36,25 @@ namespace SFP_TOOL_CH341
         //   UCHAR iDevice,  // The lower 7 bits specify the I2C device address
         //   UCHAR iAddr,  // Address of specified data unit
         //   UCHAR iByte);  // Byte data to be written
+    // for 32 bit windows
+    /*
+        [DllImport("./CH341DLL.DLL")]
+        private static extern long CH341OpenDevice(long i);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern long CH341ResetDevice(long i);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern long CH341GetVersion(long i);
+        [DllImport("./CH341DLLA.DLL")]
+        private static extern long CH341GetDrvVersion(long i);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern int CH341GetVerIC(long i);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern byte[] CH341GetDeviceName(long i);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern int CH341ReadI2C(long i,int  addr, byte off,ref byte b);
+        [DllImport("./CH341DLL.DLL")]
+        private static extern int CH341WriteI2C(long i, byte addr, byte off, byte b);
+       */
         [DllImport("./CH341DLLA64.DLL")]
         private static extern long CH341OpenDevice(long i);
         [DllImport("./CH341DLLA64.DLL")]
@@ -49,12 +68,22 @@ namespace SFP_TOOL_CH341
         [DllImport("./CH341DLLA64.DLL")]
         private static extern byte[] CH341GetDeviceName(long i);
         [DllImport("./CH341DLLA64.DLL")]
-        private static extern int CH341ReadI2C(long i,int  addr, byte off,ref byte b);
+        private static extern int CH341ReadI2C(long i, int addr, byte off, ref byte b);
         [DllImport("./CH341DLLA64.DLL")]
         private static extern int CH341WriteI2C(long i, byte addr, byte off, byte b);
-  
+        [DllImport("./CH341DLLA64.DLL")]
+        private static extern int CH341SetStream(long i, long imode);
+
+        private void Initinitialize()
+        {
+            CH341OpenDevice(0);
+            // Reset Device
+            CH341ResetDevice(0);
+            // I2C speed mode (0=20k / 1 = 100K / 2 =400k)
+            CH341SetStream(0, 1);       // 0=20Khz, 1=100Khz, 2=400Khz
+        }
         // CH341のドライバーとchipのversionを調べる
-       unsafe public int getver(ref long dllVersion, ref long driverVersion, ref byte[] p, ref long icVersion)
+        public int getver(ref long dllVersion, ref long driverVersion, ref byte[] p, ref long icVersion)
         {
             Console.Error.WriteLine("CH341.getver");
             long h = CH341OpenDevice(0);
@@ -73,21 +102,37 @@ namespace SFP_TOOL_CH341
 
             return (int)h;
         }
+        public byte readI2CReg8(byte add, byte reg)
+        {
+            byte data = 0;
+            Initinitialize();
+            byte ad = (byte)((int)add >> 1);
+            CH341ReadI2C(0, ad, reg, ref data);
+            return data;
+        }
+        public byte writeI2CReg8(byte add, byte reg,byte data)
+        {
+            Initinitialize();
+            byte ad = (byte)((int)add >> 1);
+            CH341WriteI2C(0, ad, reg, data);
+
+            return 0;
+        }
         // 指定されたlowr pageをI2経由で読む
-        public int read_low(ref byte[] o, byte page)
+        public int read_upper(ref byte[] o, byte page)
         {
             byte i;
             byte data=0;
 
             Console.Error.WriteLine("SFP/QSFP/OSFP EEPROM A0h page dump via CH341");
 
-            CH341OpenDevice(0);
-            CH341ResetDevice(0);
+            Initinitialize();
 
             CH341WriteI2C(0, 0x50, 0x7f, page);    // page select
 
             for (i = 0x80; i < 0xff; i++)
             {               // 128 byteあけて後半だけに埋める
+                Thread.Sleep(1);  // 1 ms delay
                 int b = CH341ReadI2C(0, 0x50, i, ref data);
 		        o[i] = data;
             }
@@ -114,30 +159,28 @@ namespace SFP_TOOL_CH341
 
             Console.Error.WriteLine("SFP/QSFP/OSFP EEPROM A0h dump via CH341");
 
-            // Open Device
-            CH341OpenDevice(0);
-            // Reset Device
-            CH341ResetDevice(0);
-            // I2C speed mode (0=20k / 1 = 100K / 2 =400k)
-        //    CH341SetStream(0, 1);
+            Initinitialize();
 
             CH341WriteI2C(0, 0x50, 0x7f, 0x00);        // page select 00
 
             for (i = 0; i < 0xff; i++)
             {
+                Thread.Sleep(4);  // 1 ms delay
                 CH341ReadI2C(0, 0x50, i, ref data);
                 eprom[i] = data;
                 //	Sleep(1);		// delat 1 msec
             }
             return 0xff;
         }
-        public short readw(byte addr,byte page, byte offset)
+        public UInt16 readw(byte addr,byte page, byte offset)
         {
-            byte[] buf= new byte[2] ;
+            Initinitialize();
+            byte b0=0, b1=0;
             CH341WriteI2C(0, 0x50, 0x7f, page);
-            CH341ReadI2C(0, addr, offset, ref buf[0]);
-            CH341ReadI2C(0, addr, ++offset, ref buf[1]);
-            return BitConverter.ToInt16(buf, 0); ;
+            CH341ReadI2C(0, addr, offset, ref b0);
+            CH341ReadI2C(0, addr, ++offset, ref b1);
+            //   return BitConverter.ToInt16(buf, 0); 
+            return (UInt16)(b0 * 0x100 + b1);
         }
     }
 }

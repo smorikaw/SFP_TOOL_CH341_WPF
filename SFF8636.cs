@@ -4,6 +4,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 
 namespace SFP_TOOL_CH341
 {
@@ -29,23 +30,18 @@ namespace SFP_TOOL_CH341
         public string diagtype(int code)
         {
             String s = "";
-            switch (0x1e & code)
-            {
-                case 0x00: s = "OMA"; break;
-                case 0x14: s = "Temp/AVP"; break;
-                case 0x0d: s = "VCC/AVP"; break;
-                case 0x0e: s = "VCC/VAP/TX"; break;
-                case 0xc1: s = "Temp/VCC/AVP/TX"; break;
-                case 0x1c: s = "Temp/VCC/AVP"; break;
-                case 0x1e: s = "Temp/VCC/AVP/TX"; break;
-            }
-            if (0x20 == code) s = "Power Class 8 (over 5.0 W)";
+
+            if ((0b_0010_0000 & (int)code) != 0) s += "/Temp";
+            if ((0b_0001_0000 & (int)code) != 0) s += "/VCC";
+            if ((0b_0000_1000 & (int)code) != 0) s += "/AVP";
+            if ((0b_0000_0100 & (int)code) != 0) s += "/TXP"; ;
+
             return s;
         }
         public string rev(int code)
         {
             String s = "";
-            switch (0x1e & code)
+            switch (code)
             {
                 case 0x00: s = "Revision not specified. Do not use for SFF-8636 rev 2.5 or higher."; break;
                 case 0x01: s = "SFF-8436 Rev 4.8 or earlier"; break;
@@ -87,6 +83,52 @@ namespace SFP_TOOL_CH341
             if ((0b_0000_0001 & (int)code) != 0) s += "/tunable";
             return s;
         }
+        string type(int code)
+        {
+            string s = "";
+
+            if ((0b_1000_0000 & (int)code) != 0) s += "extend type";
+            if ((0b_0100_0000 & (int)code) != 0) s += "/10GBASE-LRM";
+            if ((0b_0010_0000 & (int)code) != 0) s += "/10GBASE-LR";
+            if ((0b_0001_0000 & (int)code) != 0) s += "/10GBASE-SR";
+            if ((0b_0000_1000 & (int)code) != 0) s += "/40GBASE-CR4";
+            if ((0b_0000_0100 & (int)code) != 0) s += "/40GBASE-SR4";
+            if ((0b_0000_0010 & (int)code) != 0) s += "/40GBASE-LR4";
+            if ((0b_0000_0001 & (int)code) != 0) s += "/40G Active";
+
+            return s;
+        }
+        string optpage(int code)
+        {
+            string s = "";
+
+            if ((0b_0000_0100 & (int)code) != 0) s += "page00 only"; else s += "page 03";
+            if ((0b_0000_0010 & (int)code) != 0) s += "/IntL not asserted";
+
+            return s;
+        }
+        string opt193(int code)
+        {
+            string s = "";
+
+            if ((0b_0100_0000 & (int)code) != 0) s += "LPMode/TXDis configurable";
+            if ((0b_0010_0000 & (int)code) != 0) s += "/IntL/RXLOSL configurable";
+
+            return s;
+        }
+        string opt195(int code)
+        {
+            string s = "";
+
+            if ((0b_1000_0000 & (int)code) != 0) s += "page02";
+            if ((0b_0100_0000 & (int)code) != 0) s += "/page01";
+            if ((0b_0010_0000 & (int)code) != 0) s += "/rate select";
+            if ((0b_0001_0000 & (int)code) != 0) s += "/TXDis";
+            if ((0b_0000_1000 & (int)code) != 0) s += "/TX falt";
+            if ((0b_0000_0010 & (int)code) != 0) s += "/TX LOS";
+            if ((0b_0000_0001 & (int)code) != 0) s += "/page20-21";
+            return s;
+        }
         // CC_BASE (00h 191)
         // bytes from 128 to 190
         bool SFF8636_cc(MainWindow w)
@@ -117,8 +159,10 @@ namespace SFP_TOOL_CH341
             else { 
 
             s += "Identifer   : " + sff8024.ident(w.PAGE00[0x80]) + "\r\n";
-            s += "Revision    : " + rev(w.EEPROM[1]) + "\r\n";
+            s += "Revision    : " + rev(w.PAGE00[0x82]) + "\r\n";
             s += "Power Class : " + pwrc(w.PAGE00[129]) + "\r\n";
+            s += "Type        : " + type(w.PAGE00[131]) + "\r\n";
+            s += "EXT Type    : " + sff8024.exttype(w.PAGE00[192]) + "\r\n";
             s += "Vendor Name : " + sfp.nGet(ref w.PAGE00, 148, 16) + "\r\n";
             s += "Vendor PN   : " + sfp.nGet(ref w.PAGE00, 168, 16) + "\r\n";
 
@@ -130,23 +174,28 @@ namespace SFP_TOOL_CH341
             s += "Vendor DATE : " + sfp.nGet(ref w.PAGE00, 212, 8) + "\r\n";
             s += "connector   : " + sff8024.connector_type(w.PAGE00[130]) + "\r\n";
 
-            s += "Length(SMF) : " + string.Format("{0:d4}", w.PAGE00[142]) + " km\r\n";
-            s += "Length(OM3) : " + string.Format("{0:d4}", w.PAGE00[144]) + " m\r\n";
-            s += "Length(OM1) : " + string.Format("{0:d4}", w.PAGE00[145]) + " m\r\n";
-            s += "Length(OM4) : " + string.Format("{0:d4}", w.PAGE00[146] * 2) + " m\r\n";
+            s += "Length(SMF) : " + string.Format("{0:d}", w.PAGE00[142]) + " km\r\n";
+            s += "Length(OM3) : " + string.Format("{0:d}", w.PAGE00[144]) + " m\r\n";
+            s += "Length(OM1) : " + string.Format("{0:d}", w.PAGE00[145]) + " m\r\n";
+            s += "Length(OM4) : " + string.Format("{0:d}", w.PAGE00[146] * 2) + " m\r\n";
             s += "Device Tech : " + devtech(w.PAGE00[147]) + "\r\n";
             // 6.3.24 Options (00h 193-195)
             s += "Options     : " + string.Format("{0:B8} : ", w.PAGE00[193]) +
                                     string.Format("{0:B8} : ", w.PAGE00[194]) +
                                     string.Format("{0:B8}", w.PAGE00[195]) + "\r\n";
-            // Table 6-24 Diagnostic Monitoring Type (Page 00h Byte 220
-            s += "Diag type   : " + diagtype(w.PAGE00[220]) + "\r\n";
+            s += "Options(193): " + opt193(w.PAGE00[193]) + "\r\n";
+            s += "Options(195): " + opt195(w.PAGE00[195]) + "\r\n";
+                // Table 6-24 Diagnostic Monitoring Type (Page 00h Byte 220
+                s += "Diag type   : " + diagtype(w.PAGE00[220]) + "\r\n";
             // Table 6-25 Enhanced Options (Page 00h Byte 221)
             s += "Echance opt : " + string.Format("{0:B8}", w.PAGE00[221]) + "\r\n";
             // Table 6-26 Extended Baud Rate: Nominal (Page 00h Byte 222)
             // F2 is 小数点以下二桁
             s += "BR rate     : " + string.Format("{0:F2}", w.PAGE00[222] * 0.25F) + "Gbps\r\n";
-        }
+                // Table 6-24 Diagnostic Monitoring Type (Page 00h Byte 220
+            s += "L-Rev Comp  : " + rev(w.EEPROM[1]) + "\r\n";
+            s += "L-Options   : " + optpage(w.EEPROM[2]) + "\r\n";
+            }
             return s;
             
         }

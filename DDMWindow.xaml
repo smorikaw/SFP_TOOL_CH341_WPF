@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SFP_TOOL_CH341"
         mc:Ignorable="d"
-        Title="DDMWindow" Height="240" Width="300" MinWidth="200" MinHeight="200" MaxHeight="400" MaxWidth="800">
+        Title="DDMWindow" Height="300" Width="300" MinWidth="300" MinHeight="200" MaxHeight="400" MaxWidth="600">
 
     <Grid Margin ="0,2,0,0">
         <Grid.ColumnDefinitions>
@@ -15,20 +15,28 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <CheckBox Content="LPmode" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <CheckBox Content="auto update" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Column="1"/>
-        <Button Content="update" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Click" Grid.Column="3" Margin="19,0,0,0"/>
-        <DataGrid x:Name="DataGridName" AutoGenerateColumns="False" Grid.Row="1" Grid.ColumnSpan="3">
+        <CheckBox x:Name="LPm" Content="LPmode" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" />
+        <CheckBox Content="auto update" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0"  Grid.Column="1"/>
+        <Button Content="update" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Click" Grid.Row="0" Grid.Column="3" Margin="19,0,0,0"/>
+        <TextBox x:Name="vccText" Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="tempText" Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="txpText" Grid.Row="1" Grid.Column="2" HorizontalContentAlignment="Center"/>
+        <DataGrid x:Name="DataGridName" AutoGenerateColumns="False" Grid.Row="2" Grid.ColumnSpan="3">
             <DataGrid.Columns>
-                <DataGridTextColumn  Header="LANE" Binding="{Binding _Lane}" Width = "40"/>
-                <DataGridTextColumn  Header="RX PWR" Binding="{Binding _RXpwr}" Width = "auto"/>
-                <DataGridTextColumn  Header="TX Bias" Binding="{Binding _TXbias}" Width = "auto"/>
-                <DataGridTextColumn  Header="TX PWR" Binding="{Binding _TXpwr}" Width = "auto"/>
+                <DataGridTextColumn  Header="LANE" Binding="{Binding _Lane}" Width = "40" />
+                <DataGridTextColumn  Header="RX PWR" Binding="{Binding _RXpwr}" Width = "80"/>
+                <DataGridTextColumn  Header="TX Bias" Binding="{Binding _TXbias}" Width = "70"/>
+                <DataGridTextColumn  Header="TX PWR" Binding="{Binding _TXpwr}" Width = "80"/>
             </DataGrid.Columns>
+            <DataGrid.Resources>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                </Style>
+            </DataGrid.Resources>
         </DataGrid>
 
 

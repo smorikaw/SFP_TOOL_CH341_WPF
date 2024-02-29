@@ -44,7 +44,7 @@ namespace SFP_TOOL_CH341
                 CMIS52 cmis = new();
 
             s = "---------- CMIS -------\r\n";
-                s += "Identifer : " + sff8024.ident(w.PAGE00[0x80]) + "\r\n";
+                s += "Identifer   : " + sff8024.ident(w.PAGE00[0x80]) + "\r\n";
                 s += "Power Class : " + cmis.pwrc(w.PAGE00[200]) + "\r\n";
                 s += "Vendor VN   : " + sfp.nGet(ref w.PAGE00, 129, 16) + "\r\n";
                 s += "Vendor PN   : " + sfp.nGet(ref w.PAGE00, 148, 16) + "\r\n";
@@ -65,10 +65,10 @@ namespace SFP_TOOL_CH341
 
                 for (i = 1; i <= cmis.APPC(w); i++)
                 {
-                    s += "APP HOST  : " + cmis.APPHOST(i,w) + "\r\n";
-                    s += "APP MEDIA : " + cmis.APPMEDIA(i,w) + "\r\n";
-                    s += "APP LANE  : " + cmis.APPLANE(i,w) + "\r\n";
-                    s += "APP OPTION: " + cmis.APPOPT(i,w) + "\r\n";
+                    s += string.Format("APP HOST{0:D1}  : " ,i)+ cmis.APPHOST(i,w) + "\r\n";
+                    s += string.Format("APP MEDIA{0:D1} : " , i)+ cmis.APPMEDIA(i,w) + "\r\n";
+                    s += string.Format("APP LANE{0:D1}  : ", i) + cmis.APPLANE(i,w) + "\r\n";
+                    s += string.Format("APP OPTION{0:D1}: ", i) + cmis.APPOPT(i,w) + "\r\n";
                 }
                 return s;
             }

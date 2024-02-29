@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+#
+CH341DLL.DLL
+CH341DLLA64.DLL

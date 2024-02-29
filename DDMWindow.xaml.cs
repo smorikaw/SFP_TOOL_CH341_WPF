@@ -47,14 +47,14 @@ namespace SFP_TOOL_CH341
 
             ddms = new List<DataGridItems>
             {
-                new DataGridItems("0", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("1", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("2", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("3", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("4", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("5", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("6", "00 dBm", "100mA", "00dBm"),
-                new DataGridItems("7", "00 dBm", "100mA", "00dBm"),
+                new DataGridItems("0", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("1", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("2", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("3", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("4", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("5", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("6", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
+                new DataGridItems("7", "-40.0000 dBm", "0.0000 mA", "-40.0000 dBm"),
             };
 
             DataGridName.ItemsSource = ddms;
@@ -64,24 +64,26 @@ namespace SFP_TOOL_CH341
         {
             return 1;
         }
-        // LSB equal to 0.1 μW,
+        // byte 50-57 LSB equal to 0.1 μW,
         float SFF8636_ddm_txpwr(int i)
         {
             int v;
             float f;
             CH341 ch341 = new();
-            v = ch341.readw(0x50, 0, (byte)(50 + (i * 6)));
+          //  v = ch341.readw(0x50, 0, (byte)(50 + (i * 2)));
+            v = ch341.readI2CReg8(0xa0, (byte)(50 + (i * 2))) * 0x100 + ch341.readI2CReg8(0xa0, (byte)(51 + (i * 2)));
             f = (float)v * 0.0001F;
-            return (float)System.Math.Log10((double)f);
+            return (float)System.Math.Log10((double)f)*10F;
         }
         float SFF8636_ddm_rxpwr(int i)
         {
             int v;
             float f;
             CH341 ch341 = new();
-            v = ch341.readw(0x50, 0, (byte)(34 + (i * 6)));
+            //   v = ch341.readw(0x50, 0, (byte)(34 + (i * 2)));
+            v = ch341.readI2CReg8(0xa0, (byte)(34 + (i * 2))) * 0x100 + ch341.readI2CReg8(0xa0, (byte)(35 + (i * 2)));
             f = (float)v * 0.0001F;
-            return (float)System.Math.Log10((double)f);
+            return (float)System.Math.Log10((double)f)*10F;
         }
         // equal to 2 μA,
         float SFF8636_ddm_txbias(int i)
@@ -89,15 +91,32 @@ namespace SFP_TOOL_CH341
             int v;
             float f;
             CH341 ch341 = new();
-            v = ch341.readw(0x50, 0, (byte)(100 + (i * 6)));
+            //   v = ch341.readw(0x50, 0, (byte)(42 + (i * 2)));
+            v = ch341.readI2CReg8(0xa0, (byte)(42 + (i * 2))) * 0x100 + ch341.readI2CReg8(0xa0, (byte)(43 + (i * 2)));
             f = (float)v * 0.002F;
             return f;
         }
         void SFF8472_ddm_update()
         {
-        //        ddms[0]._RXpwr = string.Format("{0:F4} dBm", SFF8472_ddm_txpwr());
-         //       ddms[0]._TXbias = string.Format("{0:F4} mA", SFF8472_ddm_txpwr());
-         //       ddms[0]._TXpwr = string.Format("{0:F4} dBm", SFF8472_ddm_txpwr());
+            //        ddms[0]._RXpwr = string.Format("{0:F4} dBm", SFF8472_ddm_txpwr());
+            //       ddms[0]._TXbias = string.Format("{0:F4} mA", SFF8472_ddm_txpwr());
+            //       ddms[0]._TXpwr = string.Format("{0:F4} dBm", SFF8472_ddm_txpwr());
+        }
+        void SFF8636_temp()
+        {
+            CH341 ch341 = new();
+            float temp = (float)ch341.readI2CReg8(0xa0, 23) / 256.0F + (float)ch341.readI2CReg8(0xa0, 22); ;
+            tempText.Text = string.Format("{0:X2}", ch341.readI2CReg8(0xa0, 22)) +
+                string.Format("{0:X2} : ", ch341.readI2CReg8(0xa0, 23)) + 
+                string.Format("{0:F2} C", temp);
+        }
+        void SFF8636_vcc()
+        {
+            CH341 ch341 = new();
+            float vcc = ((float)ch341.readI2CReg8(0xa0,27) + (float)ch341.readI2CReg8(0xa0, 26) * 256F) / 10000F;
+            vccText.Text = string.Format("{0:X2}", ch341.readI2CReg8(0xa0, 26)) +
+                string.Format("{0:X2} : ", ch341.readI2CReg8(0xa0, 27)) +
+                string.Format("{0:F2} V", vcc);
         }
         void SFF8636_ddm_update()
         {
@@ -106,18 +125,27 @@ namespace SFP_TOOL_CH341
             /*
             // if
             {
-                ddms[0]._RXpwr = string.Format("{0:F6} dBm", SFF8636_ddm_rxpwr(0));
-                ddms[0]._TXbias = string.Format("{0:F6} mA", SFF8636_ddm_txbias(0));
-                ddms[0]._TXpwr = string.Format("{0:F6} dBm", SFF8636_ddm_txpwr(0));
+                ddms[0]._RXpwr = string.Format("{0:F4} dBm", SFF8636_ddm_rxpwr(0));
+                ddms[0]._TXbias = string.Format("{0:F4} mA", SFF8636_ddm_txbias(0));
+                ddms[0]._TXpwr = string.Format("{0:F4} dBm", SFF8636_ddm_txpwr(0));
             }
             */
+            SFF8636_temp();
+            SFF8636_vcc();
             for (i = 0; i < 4; i++)
             {
-                ddms[i]._RXpwr = string.Format("{0:F6} dBm", SFF8636_ddm_txpwr(i));
-                ddms[i]._TXbias = string.Format("{0:F6} dBm", SFF8636_ddm_txbias(i));
-                ddms[i]._TXpwr = string.Format("{0:F6} dBm", SFF8636_ddm_txpwr(i));
+                ddms[i]._RXpwr = string.Format("{0:F4} dBm", SFF8636_ddm_rxpwr(i));
+                ddms[i]._TXbias = string.Format("{0:F4} mA", SFF8636_ddm_txbias(i));
+                ddms[i]._TXpwr = string.Format("{0:F4} dBm", SFF8636_ddm_txpwr(i));
+            }
+            for (i = 4; i < 8; i++)
+            {
+                ddms[i]._RXpwr = "NA";
+                ddms[i]._TXbias = "NA";
+                ddms[i]._TXpwr = "NA";
             }
         }
+        // update bottun
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             switch (format_check())
@@ -131,6 +159,24 @@ namespace SFP_TOOL_CH341
                     break;
             }
             DataGridName.Items.Refresh();
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            // byte 99 bit 1 is LP/TXDis select
+            // byte 93 bit 0 is Override
+            //         bit 3 is class 8 enable
+            //         bit 2 is class 5-7 enable
+            //         bit 1 is set Lpmode(class 1)
+            CH341 ch341 = new CH341();
+            ch341.writeI2CReg8(0x0a, 93, 0b_0000_0101);
+            txpText.Text = "LP mode on";
+        }
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CH341 ch341 = new CH341();
+            ch341.writeI2CReg8(0x0a, 93, 0b_0000_0011);
+            txpText.Text = "LP mode off";
         }
     }
     public class DataGridItems

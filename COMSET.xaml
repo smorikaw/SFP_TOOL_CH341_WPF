@@ -1,0 +1,21 @@
+﻿<Window x:Class="SFP_TOOL_CH341.COMSET"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SFP_TOOL_CH341"
+        mc:Ignorable="d"
+        Title="COMSET" Height="160" Width="300">
+    <Grid>
+        <ComboBox x:Name="COM"  HorizontalAlignment=" Left" Margin="122,10,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding COMPorts}" DropDownOpened="ComboBoxDropDownOpened_COMPort" SelectionChanged="COM_SelectionChanged" />
+        <Label Content="COM PORT" HorizontalAlignment="Left" Margin="38,10,0,0" VerticalAlignment="Top"/>
+        <RadioButton Content="not select" HorizontalAlignment="Left" Margin="23,43,0,0" VerticalAlignment="Top" Width="99" RenderTransformOrigin="0.5,0.5" Checked="RadioButton_Checked_2">
+        </RadioButton>
+        <Button Content="TEST" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Width="246" Click="Button_Click"/>
+        <TextBox x:Name ="comText" HorizontalAlignment="Left" Margin="23,88,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="267"/>
+        <RadioButton Content="USB-ISS" HorizontalAlignment="Left" Margin="122,43,0,0" VerticalAlignment="Top" Checked="RadioButton_Checked"/>
+        <RadioButton Content="SC18IM700" HorizontalAlignment="Left" Margin="195,42,0,0" VerticalAlignment="Top" Checked="RadioButton_Checked_1"/>
+
+    </Grid>
+</Window>

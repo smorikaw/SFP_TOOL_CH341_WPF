@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -29,6 +30,9 @@ namespace SFP_TOOL_CH341
         public byte[] PAGE02 = new byte[256];
         public byte[] PAGE03 = new byte[256];
 
+        public UInt32? COM_MODE;
+        public String? COM_PORT;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -53,7 +57,7 @@ namespace SFP_TOOL_CH341
                 //
                 // HEX dump
                 //
-                textBox.Text = HEX_upper();
+                textBox.Text = HEX_lower();
                 textBox.Text += HEX_page00();
                 if (len > 0x100) { 
                 textBox.Text += HEX_page01();
@@ -78,25 +82,80 @@ namespace SFP_TOOL_CH341
             //     Page 01h (Advertising)
             //      
             //     Page 03h (User EEPROM)
+            statusLabel.Content = "start CH341 read";
             CH341 ch341 = new CH341();
-            statusLabel.Content = "read I2C upper";
+            statusLabel.Content = "read I2C lower";
             ch341.read_page00(ref EEPROM);
+            textBox.Text = HEX_lower();
+
             statusLabel.Content = "read I2C page00";
-            ch341.read_low(ref PAGE00, 0);
-            statusLabel.Content = "read I2C page01";
-            ch341.read_low(ref PAGE01, 1);
-            statusLabel.Content = "read I2C page02";
-            ch341.read_low(ref PAGE02, 2);
+            ch341.read_upper(ref PAGE00, 0);
+            textBox.Text += HEX_page00();
+            //   statusLabel.Content = "read I2C page01";
+            //   ch341.read_upper(ref PAGE01, 1);
+            //  textBox.Text += HEX_page01();
+            //   statusLabel.Content = "read I2C page02";
+            //   ch341.read_upper(ref PAGE02, 2);
+
             statusLabel.Content = "read I2C page03";
-            ch341.read_low(ref PAGE03, 3);
+            ch341.read_upper(ref PAGE03, 3);
+            textBox.Text += HEX_page03();
+            //
+            SFP sfp = new();
+            textBox.Text += sfp.sff_eth(this);      // decode details
+        }
+        private void COMsel_Click(object sender, RoutedEventArgs e)
+        {
+            statusLabel.Content = "open Serial setting";
+            COMSET comset = new COMSET();
+            comset.Owner = this;
+            comset.Show();
+        }
+        private void script_Click(object sender, RoutedEventArgs e)
+        {
+            statusLabel.Content = "open Script Edit window";
+            ScriptEdit w = new ScriptEdit();
+            w.Owner = this;
+            w.Show();
+        }
+        private void ISS_Click(object sender, RoutedEventArgs e)
+        {
+            // SFF8472
+            //    A2h Diagnostics DDM
+            // SFF8636 Table 6-22 Option Values (Page 00h Bytes 193-195)
+            //    byte 195 7 : Memory Page 02 provided. 1 if implemented, else 0.
+            //             6 : Memory Page 01h provided. 1 if implemented, else 0.
+            //             0 : Pages 20-21h implemented. Default = 0 (not implemented).
+            // CMIS
+            //     Page 01h (Advertising)
+            //      
+            //     Page 03h (User EEPROM)
+            switch (COM_MODE)
+            {
+                case 0:
+                    MessageBox.Show("Please select I2C chip type","Serial I2C type not set",
+                        MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.Yes);
+                    break;
+                case 1:
+                    statusLabel.Content = "read ISS upper";
+                    USBISS usbiss = new();
+                    usbiss.read_page00(ref EEPROM, COM_PORT);
+                    usbiss.read_upper(ref PAGE00, 0, COM_PORT);
+                    break;
+                case 2:
+                    statusLabel.Content = "read IM700 upper";
+                    SC18IM700 im700 = new();
+                    im700.readI2C(0x00, 0x80, ref EEPROM);
+                    im700.readI2C(0x80, 0x80, ref PAGE00);
+                    break;
+            }
+
+
             //
             // HEX dump
             //
-            textBox.Text  = HEX_upper();
-            textBox.Text += HEX_page00() ;
-            textBox.Text += HEX_page01();
-            textBox.Text += HEX_page02();
-            textBox.Text += HEX_page03();
+            textBox.Text = HEX_lower();
+            textBox.Text += HEX_page00();
 
             SFP sfp = new();
             textBox.Text += sfp.sff_eth(this);
@@ -143,7 +202,7 @@ namespace SFP_TOOL_CH341
         }
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
-            //         textBox.Copy
+            textBox.Copy();
         }
         private void OnCtrlC(object sender, RoutedEventArgs e)
                         {
@@ -154,21 +213,26 @@ namespace SFP_TOOL_CH341
                         }
         private void I2CConf_Click(object sender, RoutedEventArgs e)
         {
+            USBISS usbiss = new();
+            MessageBox.Show(usbiss.getver(COM_PORT), "USB-ISS get version",
+                MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.Yes);
         }
         private void DDM_Click(object sender, RoutedEventArgs e)
         {
             DDMWindow ddmwin = new DDMWindow();
+            ddmwin.Owner = this;
             ddmwin.Show();
         }
         private void Info_Click(object sender, RoutedEventArgs e)
         {
             INFOWindow infwin = new INFOWindow();
+            infwin.Owner = this;
             infwin.Show();
         }
         //
         //=============================================
         //
-        public String HEX_upper() {
+        public String HEX_lower() {
             int i, j;
             String s = "";
             for (i = 0; i< 0x08; i++)
@@ -332,10 +396,10 @@ namespace SFP_TOOL_CH341
         public byte[] PAGE01 = new byte[256];
         public byte[] PAGE02 = new byte[256];
         public byte[] PAGE03 = new byte[256];
-        public byte[] upper { get; set; }
-        public byte[] page00 { get; set; }
-        public byte[] page01 { get; set; }
-        public byte[] page02 { get; set; }
-        public byte[] page03 { get; set; }
+        public byte[]? upper { get; set; }
+        public byte[]? page00 { get; set; }
+        public byte[]? page01 { get; set; }
+        public byte[]? page02 { get; set; }
+        public byte[]? page03 { get; set; }
     }
 }/// end of name space
