@@ -4,6 +4,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -30,8 +31,8 @@ namespace SFP_TOOL_CH341
         public byte[] PAGE02 = new byte[256];
         public byte[] PAGE03 = new byte[256];
 
-        public UInt32? COM_MODE;
-        public String? COM_PORT;
+        public UInt32? COM_MODE = 0;
+        public string COM_PORT = "COM3:";
 
         public MainWindow()
         {
@@ -39,11 +40,14 @@ namespace SFP_TOOL_CH341
         }
         private void Open_Click(object sender, RoutedEventArgs e)
         {
+            int len=0;
             // Configure load file dialog box
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.FileName = "EEPROM"; // Default file name
             dialog.DefaultExt = ".bin"; // Default file extension
-            dialog.Filter = "bin documents (.bin)|*.bin"; // Filter files by extension
+            dialog.Filter = "bin documents (.bin)|*.bin" +
+                "|json files|*.json" +
+                "|All files|*.*";            // Filter files by extension
 
             // Show save file dialog box
             bool? result = dialog.ShowDialog();
@@ -53,20 +57,31 @@ namespace SFP_TOOL_CH341
             {
                 // Load document
                 string filename = dialog.FileName;
-                int len = LoadFromBinaryFile(filename, this);
+
+                // "+.json" branch
+                if (filename.Substring(filename.IndexOf("."),2).Equals(".j"))
+                {
+                    statusLabel.Content = "load json";
+                    LoadFromJsonFile(filename, this);
+                    len = 0x180;        // include page01
+                }
+                else
+                {
+                    statusLabel.Content = "load bin";
+                    len = LoadFromBinaryFile(filename, this);
+                }
+
                 //
                 // HEX dump
                 //
                 textBox.Text = HEX_lower();
                 textBox.Text += HEX_page00();
-                if (len > 0x100) { 
-                textBox.Text += HEX_page01();
-                textBox.Text += HEX_page02();
-                textBox.Text += HEX_page03();
-                }
+                if (len > 0x100) textBox.Text += HEX_page01();
+                if (len > 0x180) textBox.Text += HEX_page02();
+                if (len > 0x200) textBox.Text += HEX_page03();
+                
                 // decode
-                SFP sfp = new();
-                textBox.Text += sfp.sff_eth(this);
+                textBox.Text += SFP.sff_eth(this);
 
             }
         }
@@ -101,8 +116,7 @@ namespace SFP_TOOL_CH341
             ch341.read_upper(ref PAGE03, 3);
             textBox.Text += HEX_page03();
             //
-            SFP sfp = new();
-            textBox.Text += sfp.sff_eth(this);      // decode details
+            textBox.Text += SFP.sff_eth(this);      // decode details
         }
         private void checkCH341_Click(object sender, RoutedEventArgs e)
         {
@@ -170,8 +184,7 @@ namespace SFP_TOOL_CH341
             textBox.Text = HEX_lower();
             textBox.Text += HEX_page00();
 
-            SFP sfp = new();
-            textBox.Text += sfp.sff_eth(this);
+            textBox.Text += SFP.sff_eth(this);
         }
         //==========================================================
         //
@@ -191,7 +204,7 @@ namespace SFP_TOOL_CH341
             {
                 // Save document
                 string filename = dialog.FileName;
-                SaveToJsonFile(filename,this);
+                SaveToBinaryFile(filename,this);
             }
         }
         private void Save_json_Click(object sender, RoutedEventArgs e) {
@@ -210,7 +223,7 @@ namespace SFP_TOOL_CH341
                 // Save document
                 string filename = dialog.FileName;
 
-                SaveToBinaryFile(filename, this);
+                SaveToJsonFile(filename, this);
             }
         }
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -247,7 +260,7 @@ namespace SFP_TOOL_CH341
         //
         public String HEX_lower() {
             int i, j;
-            String s = "";
+            String s = "[A0h lower]" + System.Environment.NewLine;
             for (i = 0; i< 0x08; i++)
             {
                 s += System.String.Format("{0:X2} : ", i << 4);
@@ -318,21 +331,9 @@ namespace SFP_TOOL_CH341
             return s;
         }
         //=================================================================================================
+        //  .NET 8 JSON
+        //
         public static void SaveToJsonFile(string path, MainWindow w)
-        {
-            FileStream fs = new FileStream(path,
-                FileMode.Create,
-                FileAccess.Write);
-            var writer = new BinaryWriter(fs);
-            //public virtual void Write (byte[] buffer, int index, int count);
-            writer.Write(w.EEPROM, 0x00, 0x80);
-            writer.Write(w.PAGE00, 0x80, 0x80);
-            writer.Write(w.PAGE01, 0x80, 0x80);
-            writer.Write(w.PAGE02, 0x80, 0x80);
-            writer.Write(w.PAGE03, 0x80, 0x80);
-            fs.Close();
-        }
-        public static void SaveToBinaryFile(string path, MainWindow w)
         {
             var data = new SFP_EEPROM
             {
@@ -342,19 +343,40 @@ namespace SFP_TOOL_CH341
                 page02 = w.PAGE02,
                 page03 = w.PAGE03,
             };
-  //      var json_str = System.Text.Json.Serialization(data);
+            //    var json_str = System.Text.Json.Serialization(data);
+            var newfoo = JsonSerializer.Serialize(data);
+            System.IO.File.WriteAllText(path, newfoo);
+            //FileStream fs = new FileStream(path,
+            //    FileMode.Create,
+            //   FileAccess.Write);
+            // write json
+            //   fs.Write(newfoo,0,sizeof(newfoo));
+            // Console.WriteLine(newfoo);
+            //fs.Close();
+        }
+        public static void LoadFromJsonFile(string path, MainWindow w)
+        {
+            string buf = System.IO.File.ReadAllText(path);
+            SFP_EEPROM data = JsonSerializer.Deserialize<SFP_EEPROM>(buf);
+            w.EEPROM = data.upper;
+            w.PAGE00 = data.page00;
+            w.PAGE01 = data.page01;
+            w.PAGE02 = data.page02;
+            w.PAGE03 = data.page03;
 
-        FileStream fs = new FileStream(path,
+        }
+        public static void SaveToBinaryFile(string path, MainWindow w)
+        {
+            FileStream fs = new FileStream(path,
                 FileMode.Create,
                 FileAccess.Write);
             var writer = new BinaryWriter(fs);
-            //public virtual void Write (byte[] buffer, int index, int count);
-    //        writer.Write(w.EEPROM, 0x00, 0x80);
-    //        writer.Write(w.PAGE00, 0x80, 0x80);
-     //       writer.Write(w.PAGE01, 0x80, 0x80);
-      //      writer.Write(w.PAGE02, 0x80, 0x80);
-       //     writer.Write(w.PAGE03, 0x80, 0x80);
-       //     writer.Write(json_str);
+
+            writer.Write(w.EEPROM, 0x00, 0x80);
+            writer.Write(w.PAGE00, 0x80, 0x80);
+            writer.Write(w.PAGE01, 0x80, 0x80);
+            writer.Write(w.PAGE02, 0x80, 0x80);
+            writer.Write(w.PAGE03, 0x80, 0x80);
             fs.Close();
         }
         public static int LoadFromBinaryFile(string path, MainWindow w)

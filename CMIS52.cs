@@ -37,43 +37,56 @@ namespace SFP_TOOL_CH341
             //88         1 HostLaneCount / MediaLaneCount
             //89         1 HostLaneAssignmnetOptions
             //p01:176    1 MediaLaneAssigmentOptions
-            public String decode(MainWindow w) {
+            public static String decode(MainWindow w) {
             String s = "";
-                SFP sfp = new();
-                SFF8024 sff8024 = new(); 
-                CMIS52 cmis = new();
 
-            s = "---------- CMIS -------\r\n";
-                s += "Identifer   : " + sff8024.ident(w.PAGE00[0x80]) + "\r\n";
-                s += "Power Class : " + cmis.pwrc(w.PAGE00[200]) + "\r\n";
-                s += "Vendor VN   : " + sfp.nGet(ref w.PAGE00, 129, 16) + "\r\n";
-                s += "Vendor PN   : " + sfp.nGet(ref w.PAGE00, 148, 16) + "\r\n";
+                s = "---------- CMIS -------\r\n";
+                s += "Identifer   : " + SFF8024.ident(w.PAGE00[0x80]) + "\r\n";
+                s += "CMIS Rev    : " + string.Format("{0:X2}", w.EEPROM[1]) + "\r\n";
+            //  2 : support config
+            //  3 : module state
+            //  4-6 : page flags
+            //  8 : Cdb
+            //  9-11 : Warning flags
+            // 14-15 : TempMonValue
+            // 16-17 : VccMonVoltage
+                s += "Temp Mon    : " + string.Format("{0:F2}", w.EEPROM[14] + (w.EEPROM[15]/256.0)) + " C\r\n";
+                s += "Vcc Mon     : " + string.Format("{0:F2}", (w.EEPROM[16]*0x100 + w.EEPROM[17]) * 0.0001) + " mV\r\n";
+            // 18-19 : Aux1MonValtage(TEC/Later etc.)
+            // 20-21 : Aux2MonValtage
+            // 22-23 : Aux3MonValtage
+                s += "FW Revision : " + string.Format("{0}.", w.EEPROM[39]) + string.Format("{0}", w.EEPROM[40]) + "\r\n";
+            // page 00    
+                s += "Power Class : " + pwrc(w.PAGE00[200]) + "\r\n";
+                s += "Vendor VN   : " + SFP.nGet(ref w.PAGE00, 129, 16) + "\r\n";
+                s += "Vendor PN   : " + SFP.nGet(ref w.PAGE00, 148, 16) + "\r\n";
                 s += "Vendor OUI  : " + string.Format("{0:X2}:", w.PAGE00[145])+
                                         string.Format("{0:X2}:", w.PAGE00[146]) +
                                         string.Format("{0:X2}",  w.PAGE00[147]) + "\r\n";
-                s += "Vendor REV  : " + sfp.nGet(ref w.PAGE00, 164, 2) + "\r\n";
-                s += "Vendor SN   : " + sfp.nGet(ref w.PAGE00, 166, 16) + "\r\n";
-                s += "Vendor DATE : " + sfp.nGet(ref w.PAGE00, 182, 8) + "\r\n";
-                s += "connector   : " + sff8024.connector_type(w.PAGE00[203]) + "\r\n";
+                s += "Vendor REV  : " + SFP.nGet(ref w.PAGE00, 164, 2) + "\r\n";
+                s += "Vendor SN   : " + SFP.nGet(ref w.PAGE00, 166, 16) + "\r\n";
+                s += "Vendor DATE : " + SFP.nGet(ref w.PAGE00, 182, 8) + "\r\n";
+                s += "connector   : " + SFF8024.connector_type(w.PAGE00[203]) + "\r\n";
 
                 s += "Link Length : " + string.Format("{0}",  w.PAGE00[202]) + " km\r\n";
                 s += "Media Lane  : " + string.Format("{0:B8}", w.PAGE00[210]) + "\r\n";
                 s += "Cable assy  : " + string.Format("{0:X2}", w.PAGE00[211]) + "\r\n";
-                s += "Media tech  : " + cmis.MTech(w.PAGE00[212]) + "\r\n";
+                s += "Media tech  : " + MTech(w.PAGE00[212]) + "\r\n";
+                
 
                 int i;
 
-                for (i = 1; i <= cmis.APPC(w); i++)
+                for (i = 1; i <= APPC(w); i++)
                 {
-                    s += string.Format("APP HOST{0:D1}  : " ,i)+ cmis.APPHOST(i,w) + "\r\n";
-                    s += string.Format("APP MEDIA{0:D1} : " , i)+ cmis.APPMEDIA(i,w) + "\r\n";
-                    s += string.Format("APP LANE{0:D1}  : ", i) + cmis.APPLANE(i,w) + "\r\n";
-                    s += string.Format("APP OPTION{0:D1}: ", i) + cmis.APPOPT(i,w) + "\r\n";
+                    s += string.Format("APP HOST{0:D1}  : " ,i)+ APPHOST(i,w) + "\r\n";
+                    s += string.Format("APP MEDIA{0:D1} : " , i)+ APPMEDIA(i,w) + "\r\n";
+                    s += string.Format("APP LANE{0:D1}  : ", i) + APPLANE(i,w) + "\r\n";
+                    s += string.Format("APP OPTION{0:D1}: ", i) + APPOPT(i,w) + "\r\n";
                 }
                 return s;
             }
         // -----------------------------------------------------------------------
-            public String pwrc(int code) {
+            public static String pwrc(int code) {
                 string s = "";
                 switch (0xe0 & code)
                 {
@@ -88,7 +101,7 @@ namespace SFP_TOOL_CH341
                 }
                 return s;
             }
-            public float clen(int code) {
+            public static float clen(int code) {
                 float mx = 0.0F;
                 switch (0xc0 & code)
                 {
@@ -100,7 +113,7 @@ namespace SFP_TOOL_CH341
                 return (mx * (float)(0x1f & (code)));
             }
             // CMIS Table 8-36 Media Interface Technology encodings
-            public String MTech(int code) {
+            public static String MTech(int code) {
                  string s = "";
                  switch (code)
                  {
@@ -125,48 +138,40 @@ namespace SFP_TOOL_CH341
                 }
                 return s;
             }
-            public byte ID(MainWindow w) {
+            public static byte ID(MainWindow w) {
                 return w.PAGE00[0];
             }
-            public String VN(MainWindow w) {
-                SFP sfp = new();
-                return sfp.nGet(ref w.PAGE00, 129, 16);
+            public static String VN(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 129, 16);
             }
-            public String OUI(MainWindow w) {
+            public static String OUI(MainWindow w) {
                 return String.Format("{0:X2}:{0:X2}:{0:X2}", w.PAGE00[145], w.PAGE00[146], w.PAGE00[147]);
             }
-            public String PN(MainWindow w) {
-                SFP sfp = new();
-            return sfp.nGet(ref w.PAGE00, 148, 16);
+            public static String PN(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 148, 16);
             }
-            public String REV(MainWindow w) {
-                SFP sfp = new();
-            return sfp.nGet(ref w.PAGE00, 164, 2);
+            public static String REV(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 164, 2);
             }
-            public String SN(MainWindow w) {
-                SFP sfp = new();
-            return sfp.nGet(ref w.PAGE00, 166, 16);
+            public static String SN(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 166, 16);
             }
-            public String DATE(MainWindow w) {
-                SFP sfp = new();
-            return sfp.nGet(ref w.PAGE00, 182, 8);
+            public static String DATE(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 182, 8);
             }
-            public String CLEI(MainWindow w) {
-                SFP sfp = new();
-            return sfp.nGet(ref w.PAGE00, 190, 10);
+            public static String CLEI(MainWindow w) {
+                return SFP.nGet(ref w.PAGE00, 190, 10);
             }
-            public String PWRC(MainWindow w) {
-                CMIS52 cmis = new();
-                return cmis.pwrc(w.PAGE00[200]);
+            public static String PWRC(MainWindow w) {
+                return pwrc(w.PAGE00[200]);
             }
-            public float  maxPWR(MainWindow w) {
+            public static float maxPWR(MainWindow w) {
                 return ((float)w.PAGE00[201] * (float)0.25F);
             }
-            public String CONNECTOR(MainWindow w) {
-                SFF8024 sff8024 = new();
-                return sff8024.connector_type(w.PAGE00[203]);
+            public static String CONNECTOR(MainWindow w) {
+                return SFF8024.connector_type(w.PAGE00[203]);
             }
-            public float LINKLEN(MainWindow w) {
+            public static float LINKLEN(MainWindow w) {
                 return clen(w.PAGE00[202 - 128]);
             }
 
@@ -176,7 +181,7 @@ namespace SFP_TOOL_CH341
             // list number( 1-15) not zero start
             //
             // extend APP table page 01h (9-15)
-            public int APPC(MainWindow w) {
+            public static int APPC(MainWindow w) {
                 int c = 1;
                 if ((0xff & w.EEPROM[90]) == 0xff) return 1;
                 if ((0xff & w.EEPROM[94]) == 0xff) return 2;
@@ -187,24 +192,24 @@ namespace SFP_TOOL_CH341
                 if ((0xff & w.EEPROM[114]) == 0xff) return 7;
                 return c;
             }
-            public string APPHOST(int i, MainWindow w) {
-                SFF8024 sff8024 = new();
+            public static string APPHOST(int i, MainWindow w) {
+
                 if (i > 9)
                 {
-                    return sff8024.ehint(w.PAGE01[(223 - 9 + i)]);
+                    return SFF8024.ehint(w.PAGE01[(223 - 9 + i)]);
                 }
                 else
                 {
-                    return sff8024.ehint(w.EEPROM[82 + i * 4]);
+                    return SFF8024.ehint(w.EEPROM[82 + i * 4]);
                 }
             }
-            public string mint(int code, int type) {
+            public static string mint(int code, int type) {
                 String s = "";
-                SFF8024 sff8024 = new();
+
                 switch (type)
                 {       // check SMF or MMF
-                    case 0x01: s = sff8024.mmfint(code); break;
-                    case 0x02: s = sff8024.smfint(code); break;
+                    case 0x01: s = SFF8024.mmfint(code); break;
+                    case 0x02: s = SFF8024.smfint(code); break;
                     default: s = ""; break;
                 }
                 return s;
@@ -212,17 +217,16 @@ namespace SFP_TOOL_CH341
             //
             // SMF or MMF
             //
-            public string APPMEDIA(int i, MainWindow w) {
-                CMIS52 cmis = new();
-                return cmis.mint(w.EEPROM[83 + (i * 4)], w.EEPROM[85]);
+            public static string APPMEDIA(int i, MainWindow w) {
+                return mint(w.EEPROM[83 + (i * 4)], w.EEPROM[85]);
             }
-            public string APPLANE(int i, MainWindow w) {
+            public static string APPLANE(int i, MainWindow w) {
                 int v = w.EEPROM[84 + (i * 4)];
                 return string.Format("({0:X2}) = ", v) +
                         string.Format("{0:X2} : ",  (0xf0 & v)>>4) +
                         string.Format("{0:X2}",     (0x0f & v));
             }
-            public string APPOPT(int i, MainWindow w) {
+            public static string APPOPT(int i, MainWindow w) {
                 // PAGE[1]175+i]
                 return string.Format("({0:X2}) = ", w.PAGE01[175+i]) + string.Format("{0:B8}", w.PAGE01[175 + i]);
             }

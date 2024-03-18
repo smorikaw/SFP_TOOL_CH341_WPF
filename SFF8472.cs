@@ -10,13 +10,12 @@ namespace SFP_TOOL_CH341
 {
     internal class SFF8472
     {
-        public String type(ref byte[] data)
+        public static String type(ref byte[] data)
         {
             int v = 0;
             String s = "";
-            SFF8024 sff8024 = new();
 
-            s = sff8024.exttype(data[36]);
+            s = SFF8024.exttype(data[36]);
            
             v = data[3];
             if ((0b_1000_0000 & v) != 0) { s += "10G-ER/"; }
@@ -75,7 +74,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        public String diagtype(int v)
+        public static String diagtype(int v)
         {
             string s="";
             if ((0b_0100_0000 & v) != 0) s += "Diag imp/";
@@ -89,7 +88,7 @@ namespace SFP_TOOL_CH341
         // High Power Level Declaration (see SFF-8431 Addendum)
         //Value of zero identifies standard Power Levels 1 ,2 and 3 as indicated by bits 1 and 5.
         //Value of one identifies Power Level 4 requirement.Maximum power is declared in A2h, byte 66.
-        public String pwrc(int v)
+        public static String pwrc(int v)
         {
             string s = "";
             if ((0b_0100_0000 & v) != 0) s += "High power/";
@@ -107,7 +106,7 @@ namespace SFP_TOOL_CH341
             }
             return s;
         }
-        public String ehoptions(int v)
+        public static String ehoptions(int v)
         {
             string s = "";
             if ((0b_1000_0000 & v) != 0) s += "Alarm/";
@@ -121,7 +120,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        public String compliance(int code)
+        public static String compliance(int code)
         {
             string s = "";
             switch (code)
@@ -140,7 +139,7 @@ namespace SFP_TOOL_CH341
         }
         // CC_BASE [Address A0h, Byte 63]
         // byte 0 to byte 62
-        bool SFF8472_cc(MainWindow w)
+        public static bool SFF8472_cc(MainWindow w)
         {
             int i, c = 0;
             for (i = 0; i <= 62; i++)
@@ -150,14 +149,11 @@ namespace SFP_TOOL_CH341
             if ((byte)(0xff & c) == w.EEPROM[63]) return true;
             return false;
         }
-        public String decode(MainWindow w)
+        public static String decode(MainWindow w)
         {
 
             string s = "";
-            SFP sfp = new();
-            SFF8024 sff8024 = new();
-        //    SFF8472 sff8472 = new();
-            SFF8636 sff8636 = new();
+
 
             s = "---------- SFF-8472-------\r\n";
 
@@ -168,19 +164,19 @@ namespace SFP_TOOL_CH341
             else
             {
 
-                s += "Identifer   : " + sff8024.ident(w.EEPROM[0x00]) + "\r\n";
+                s += "Identifer   : " + SFF8024.ident(w.EEPROM[0x00]) + "\r\n";
                 s += "Type        : " + type(ref w.EEPROM) + "\r\n";
                 s += "Power Class : " + pwrc(w.EEPROM[64]) + "\r\n";
-                s += "Vendor Name : " + sfp.nGet(ref w.EEPROM, 20, 16) + "\r\n";
-                s += "Vendor PN   : " + sfp.nGet(ref w.EEPROM, 40, 16) + "\r\n";
+                s += "Vendor Name : " + SFP.nGet(ref w.EEPROM, 20, 16) + "\r\n";
+                s += "Vendor PN   : " + SFP.nGet(ref w.EEPROM, 40, 16) + "\r\n";
 
                 s += "Vendor OUI  : " + string.Format("{0:X2}:", w.EEPROM[37]) +
                                         string.Format("{0:X2}:", w.EEPROM[38]) +
                                         string.Format("{0:X2}", w.EEPROM[39]) + "\r\n";
-                s += "Vendor REV  : " + sfp.nGet(ref w.EEPROM, 56, 4) + "\r\n";
-                s += "Vendor SN   : " + sfp.nGet(ref w.EEPROM, 68, 16) + "\r\n";
-                s += "Vendor DATE : " + sfp.nGet(ref w.EEPROM, 84, 8) + "\r\n";
-                s += "connector   : " + sff8024.connector_type(w.EEPROM[2]) + "\r\n";
+                s += "Vendor REV  : " + SFP.nGet(ref w.EEPROM, 56, 4) + "\r\n";
+                s += "Vendor SN   : " + SFP.nGet(ref w.EEPROM, 68, 16) + "\r\n";
+                s += "Vendor DATE : " + SFP.nGet(ref w.EEPROM, 84, 8) + "\r\n";
+                s += "connector   : " + SFF8024.connector_type(w.EEPROM[2]) + "\r\n";
                 s += "wavelength  : " + string.Format("{0:d} nm",(w.EEPROM[60] * 0x100 + w.EEPROM[61])) + "\r\n";
 
                 s += "BR nomial   : " + string.Format("{0:F2}", w.EEPROM[12] * 0.1F) + " Gbps\r\n";

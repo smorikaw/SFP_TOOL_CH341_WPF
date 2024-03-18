@@ -11,7 +11,7 @@ namespace SFP_TOOL_CH341
     internal class SFF8636
     {
         // power class
-        public String pwrc(int code)
+        public static String pwrc(int code)
         {
             String s = "";
             switch (0xe3 & code)
@@ -27,7 +27,7 @@ namespace SFP_TOOL_CH341
             //  if (0x20 & code) s = "Power Class 8 (over 5.0 W)";
             return s;
         }
-        public string diagtype(int code)
+        public static string diagtype(int code)
         {
             String s = "";
 
@@ -38,7 +38,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        public string rev(int code)
+        public static string rev(int code)
         {
             String s = "";
             switch (code)
@@ -56,7 +56,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        string devtech(int code){
+        public static string devtech(int code){
             string s = "";
                     switch (0xf0 & code)
             {
@@ -83,7 +83,7 @@ namespace SFP_TOOL_CH341
             if ((0b_0000_0001 & (int)code) != 0) s += "/tunable";
             return s;
         }
-        string type(int code)
+        public static string type(int code)
         {
             string s = "";
 
@@ -98,7 +98,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        string optpage(int code)
+        public static string optpage(int code)
         {
             string s = "";
 
@@ -107,7 +107,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        string opt193(int code)
+        public static string opt193(int code)
         {
             string s = "";
 
@@ -116,7 +116,7 @@ namespace SFP_TOOL_CH341
 
             return s;
         }
-        string opt195(int code)
+        public static string opt195(int code)
         {
             string s = "";
 
@@ -131,7 +131,7 @@ namespace SFP_TOOL_CH341
         }
         // CC_BASE (00h 191)
         // bytes from 128 to 190
-        bool SFF8636_cc(MainWindow w)
+        public static bool SFF8636_cc(MainWindow w)
         {
             int i, c = 0;
             for (i=128; i <= 190; i++)
@@ -144,13 +144,11 @@ namespace SFP_TOOL_CH341
         //
         // main decode table
         //
-        public String decode(MainWindow w)
+        public static String decode(MainWindow w)
         {
             byte[] data = w.PAGE00;
             String s = "";
-            SFP sfp = new();
-            SFF8024 sff8024 = new();
-            //  SFF8636 sff8636 = new();
+
             s = "---------- SFF-8636 -------\r\n";
             if (SFF8636_cc(w) == false)
             {
@@ -158,21 +156,21 @@ namespace SFP_TOOL_CH341
             }
             else { 
 
-            s += "Identifer   : " + sff8024.ident(w.PAGE00[0x80]) + "\r\n";
+            s += "Identifer   : " + SFF8024.ident(w.PAGE00[0x80]) + "\r\n";
             s += "Revision    : " + rev(w.PAGE00[0x82]) + "\r\n";
             s += "Power Class : " + pwrc(w.PAGE00[129]) + "\r\n";
             s += "Type        : " + type(w.PAGE00[131]) + "\r\n";
-            s += "EXT Type    : " + sff8024.exttype(w.PAGE00[192]) + "\r\n";
-            s += "Vendor Name : " + sfp.nGet(ref w.PAGE00, 148, 16) + "\r\n";
-            s += "Vendor PN   : " + sfp.nGet(ref w.PAGE00, 168, 16) + "\r\n";
+            s += "EXT Type    : " + SFF8024.exttype(w.PAGE00[192]) + "\r\n";
+            s += "Vendor Name : " + SFP.nGet(ref w.PAGE00, 148, 16) + "\r\n";
+            s += "Vendor PN   : " + SFP.nGet(ref w.PAGE00, 168, 16) + "\r\n";
 
             s += "Vendor OUI  : " + string.Format("{0:X2}:", w.PAGE00[165]) +
                                     string.Format("{0:X2}:", w.PAGE00[166]) +
                                     string.Format("{0:X2}", w.PAGE00[167]) + "\r\n";
-            s += "Vendor REV  : " + sfp.nGet(ref w.PAGE00, 184, 2) + "\r\n";
-            s += "Vendor SN   : " + sfp.nGet(ref w.PAGE00, 196, 16) + "\r\n";
-            s += "Vendor DATE : " + sfp.nGet(ref w.PAGE00, 212, 8) + "\r\n";
-            s += "connector   : " + sff8024.connector_type(w.PAGE00[130]) + "\r\n";
+            s += "Vendor REV  : " + SFP.nGet(ref w.PAGE00, 184, 2) + "\r\n";
+            s += "Vendor SN   : " + SFP.nGet(ref w.PAGE00, 196, 16) + "\r\n";
+            s += "Vendor DATE : " + SFP.nGet(ref w.PAGE00, 212, 8) + "\r\n";
+            s += "connector   : " + SFF8024.connector_type(w.PAGE00[130]) + "\r\n";
 
             s += "Length(SMF) : " + string.Format("{0:d}", w.PAGE00[142]) + " km\r\n";
             s += "Length(OM3) : " + string.Format("{0:d}", w.PAGE00[144]) + " m\r\n";

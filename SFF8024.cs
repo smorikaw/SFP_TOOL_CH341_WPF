@@ -12,7 +12,7 @@ namespace SFP_TOOL_CH341
         //
         // SFF8024 Table 4-1 Identifier Values
         // 
-        public String ident(int code)
+        public static String ident(int code)
         {
             String s = "";
             switch (code)
@@ -38,7 +38,7 @@ namespace SFP_TOOL_CH341
             }
             return s;
         }
-        public String connector_type(int code)
+        public static String connector_type(int code)
         {
             String s = "";
             switch (code)
@@ -58,7 +58,7 @@ namespace SFP_TOOL_CH341
             return s;
         }
         // SFF8024 tabel 4-4
-        public String exttype(int code)
+        public static String exttype(int code)
         {
             String s = "";
             switch (code)
@@ -89,7 +89,7 @@ namespace SFP_TOOL_CH341
             return s;
         }
         // sff8024_table Table 4 - 5 Host Electrical Interface IDs
-        public String tech(int code)
+        public static String tech(int code)
         {
             String s = "";
             switch (code)
@@ -111,7 +111,7 @@ namespace SFP_TOOL_CH341
             return s;
         }
         // sff8024_table Table 4 - 5 Host Electrical Interface IDs
-        public String ehint(int code)
+        public static String ehint(int code)
         {
             String s = "";
             switch (code)
@@ -151,7 +151,7 @@ namespace SFP_TOOL_CH341
             return s;
         }
         // sff8024_table Table 4 - 5 Host Electrical Interface IDs
-        public String smfint(int code)
+        public static String smfint(int code)
         {
             string s = "";
             switch (code)
@@ -195,7 +195,7 @@ namespace SFP_TOOL_CH341
             return s;
         }
         // sff8024_table Table 4 - 5 Host Electrical Interface IDs
-        public String mmfint(int code)
+        public static String mmfint(int code)
         {
             String s = "";
             switch (code)
@@ -228,7 +228,7 @@ namespace SFP_TOOL_CH341
               }
             return s;
         }
-        public String optype(int code)
+        public static String optype(int code)
         {
             String s = "";
             switch (code)

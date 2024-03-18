@@ -10,7 +10,7 @@ namespace SFP_TOOL_CH341
     {
         public SFP() { }
         // 
-        public String nGet(ref byte[] data, int addr, int len)
+        public static String nGet(ref byte[] data, int addr, int len)
         {
             int i, j;
             char[] str = new char[256+1];
@@ -37,33 +37,27 @@ namespace SFP_TOOL_CH341
             //return String.Format("{0}",str);
         }
         //
-        public string sff_eth(MainWindow w)
+        public static string sff_eth(MainWindow w)
         {
             string s = "";
-
-            SFF8472 sff8472 = new();
-            SFF8636 sff8636 = new();
-            SFP sfp = new();
-            CMIS52 cmis = new();
-
             
-            switch (sfp.format_type(w))
+            switch (format_type(w))
             {
                 case 0:
                     w.statusLabel.Content = "decode SFF-8472";
-                    s = sff8472.decode(w); break;
+                    s = SFF8472.decode(w); break;
                 case 1:
                     w.statusLabel.Content = "decode SFF-8636"; 
-                    s = sff8636.decode(w); break;
+                    s = SFF8636.decode(w); break;
                 case 2:
                     w.statusLabel.Content = "decode CMIS";
-                    s = cmis.decode(w); break;
+                    s = CMIS52.decode(w); break;
             }
             
             return s;
         }
         // 0:SFF8472, 1:SFF8636, 2:CMIS
-        public int format_type(MainWindow w)
+        public static int format_type(MainWindow w)
         {
             int f=0;
             if (0x03 == w.EEPROM[0x00]) return 0; // SFP/SFP+/SFP28/

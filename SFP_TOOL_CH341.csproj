@@ -14,6 +14,7 @@
     <PackageProjectUrl></PackageProjectUrl>
     <PackageReadmeFile></PackageReadmeFile>
     <RepositoryUrl>https://github.com/smorikaw/SFP_TOOL_CH341_WPF</RepositoryUrl>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
