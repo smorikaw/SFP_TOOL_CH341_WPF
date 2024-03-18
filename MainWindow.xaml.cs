@@ -104,6 +104,19 @@ namespace SFP_TOOL_CH341
             SFP sfp = new();
             textBox.Text += sfp.sff_eth(this);      // decode details
         }
+        private void checkCH341_Click(object sender, RoutedEventArgs e)
+        {
+            statusLabel.Content = "check CH341 driver";
+            long dllV=0L, driverV=0L, icV=0L;
+            string name="";
+            CH341 ch341 = new();
+            ch341.getver(ref dllV, ref driverV, ref name, ref icV);
+            textBox.Text  = string.Format("dllVersion    : {0:D2}", dllV);
+            textBox.Text += string.Format("driverVersion : {0:D2}", driverV);
+            textBox.Text += string.Format("driverName    : {0:D2}", name);
+            textBox.Text += string.Format("icVersion     : {0:D2}", icV);
+
+        }
         private void COMsel_Click(object sender, RoutedEventArgs e)
         {
             statusLabel.Content = "open Serial setting";

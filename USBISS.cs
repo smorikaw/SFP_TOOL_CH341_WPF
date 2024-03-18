@@ -11,14 +11,14 @@ namespace SFP_TOOL_CH341
     internal class USBISS
     {
         static SerialPort? serialPort;
-        public String? COM_PORT;
+        public String? port;
 
         public byte readI2CReg8(byte add, byte reg)
         {
             byte[] buf = new byte[8];
             serialPort = new SerialPort();
             // Allow the user to set the appropriate properties.
-            serialPort.PortName = COM_PORT;
+            serialPort.PortName = port;
             serialPort.BaudRate = 9600;
             serialPort.Parity = Parity.None;
             serialPort.DataBits = 8;
@@ -47,7 +47,7 @@ namespace SFP_TOOL_CH341
             byte[] buf = new byte[8];
             serialPort = new SerialPort();
             // Allow the user to set the appropriate properties.
-            serialPort.PortName = COM_PORT;
+            serialPort.PortName = port;
             serialPort.BaudRate = 9600;
             serialPort.Parity = Parity.None;
             serialPort.DataBits = 8;
@@ -162,7 +162,7 @@ namespace SFP_TOOL_CH341
         {
             byte[] sb = new byte[5];
 
-            SerialPort serialPort = new SerialPort(COM_PORT, 9600, Parity.None, 8, StopBits.One);
+            SerialPort serialPort = new SerialPort(port, 9600, Parity.None, 8, StopBits.One);
             serialPort.Open();
 
             sb[0] = 0x5A; // USB-ISS version

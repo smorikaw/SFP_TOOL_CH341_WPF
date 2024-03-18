@@ -45,18 +45,19 @@ namespace SFP_TOOL_CH341
             try
             {
                 serialPort.PortName = COM_PORT;        //選択したport名
-       //       serialPort.BaudRate = baudrate;    //選択したbaudrate
-                serialPort.BaudRate = 9600;    //選択したbaudrate
+       //       serialPort.BaudRate = baudrate;        //選択したbaudrate
+                serialPort.BaudRate = 9600;            //選択したbaudrate
                 serialPort.DataBits = 8;
                 serialPort.Parity = Parity.None;
                 serialPort.StopBits = StopBits.One;
                 serialPort.WriteTimeout = 1000;
                 serialPort.ReadTimeout = 1000;
-                serialPort.Encoding = Encoding.UTF8;
+                serialPort.Encoding = System.Text.Encoding.GetEncoding("Windows-1252"); // for 8bit binary
                 serialPort.Open();
             }
             catch (Exception ex)
             {
+                SerialClose();
                 MessageBox.Show(ex.Message);
             }
         }
@@ -112,7 +113,7 @@ namespace SFP_TOOL_CH341
                     break;
                 case 1:
                     USBISS port1 = new USBISS();
-                    port1.COM_PORT = COM_PORT;
+                    port1.port = COM_PORT;
                     comText.Text = port1.check();
                     break;
                 case 2:

@@ -26,12 +26,12 @@ namespace SFP_TOOL_CH341
     /// </summary>
     public partial class ScriptEdit : Window
     {
- 
+
         /// Global
-        private SC18IM700? sfp;
-        private USBISS? sfp2;
-        private CH341? ch341;
         private UInt32 I2Cmode;
+        private CH341 ch341_sfp = new();
+        private USBISS usbiss_sfp = new();
+        private SC18IM700 im700_sfp = new();
 
         public ScriptEdit()
         {
@@ -85,69 +85,45 @@ namespace SFP_TOOL_CH341
             }
             return s;
         }
-        void doScriptIM700(UInt32 action, byte address, byte reg, UInt32 format, String valT, TextBox teXt) {
 
-            switch (action)
-                     {
-                    case 0: break;
-                    case 1:  
-                         teXt.Text = convF(sfp.readI2CReg8(address, reg), format);
-                          break;
-                    case 2:
-                         byte val = convW(valT, format);
-                         sfp.writeI2CReg8(address, reg, val);
-                        teXt.Text = "";
-                        break;
-                    }
-        }
-        void doScriptUSBISS(UInt32 action, byte address, byte reg, UInt32 format, String valT, TextBox teXt)
-        {
-
-            switch (action)
-            {
-                case 0: break;
-                case 1:
-                    teXt.Text = convF(sfp2.readI2CReg8(address, reg), format);
-                    break;
-                case 2:
-                    byte val = convW(valT, format);
-                    sfp2.writeI2CReg8(address, reg, val);
-                    teXt.Text = "";
-                    break;
-            }
-        }
-        void doScriptCH341(UInt32 action, byte address, byte reg, UInt32 format, String valT, TextBox teXt)
-        {
-            CH341 ch = new CH341();
-            switch (action)
-            {
-                case 0: break;
-                case 1:
-                    teXt.Text = convF(ch.readI2CReg8(address, reg), format);
-                    break;
-                case 2:
-                    byte val = convW(valT, format);
-                    ch.writeI2CReg8(address, reg, val);
-                    teXt.Text = "";
-                    break;
-            }
-            
-        }
-
+        //
+        // script action main
+        //
         void doScript(UInt32 action, byte address, byte reg, UInt32 format, String valT, TextBox teXt)
         {
-            
-            switch (I2Cmode)
+
+            switch (action)
             {
-                case 0:
-                    doScriptCH341(action, address, reg, format, valT, teXt);
+                case 0: break;
+                case 1:             // read action
+                    switch (I2Cmode)
+                    {
+                        case 0:
+                            teXt.Text = convF(ch341_sfp.readI2CReg8(address, reg), format);
+                            break;
+                        case 1:
+                            teXt.Text = convF(usbiss_sfp.readI2CReg8(address, reg), format);
+                            break;
+                        case 2:
+                            teXt.Text = convF(im700_sfp.readI2CReg8(address, reg), format);
+                            break;
+                    }
                     break;
-                case 1:
-                    doScriptUSBISS(action, address, reg, format, valT, teXt);
-                    break;
-                case 2:
+                case 2:         // write action
                     byte val = convW(valT, format);
-                    doScriptIM700(action, address, reg, format, valT, teXt);
+                    switch (I2Cmode)
+                    {
+                        case 0:
+                            ch341_sfp.writeI2CReg8(address, reg, val);
+                            break;
+                        case 1:
+                            usbiss_sfp.writeI2CReg8(address, reg, val);
+                            break;
+                        case 2:
+                            im700_sfp.writeI2CReg8(address, reg, val);
+                            break;
+                    }
+                    teXt.Text = "";
                     break;
             }
         }
@@ -157,15 +133,13 @@ namespace SFP_TOOL_CH341
             switch (((MainWindow)this.Owner).COM_MODE)
             {
                 case 0://
-                    ch341 = new CH341();
+
                     mode = 0; break;
                 case 1: // USB-ISS
-                    sfp2 = new USBISS();
-                    sfp2.COM_PORT = ((MainWindow)this.Owner).COM_PORT;
+                    usbiss_sfp.port = ((MainWindow)this.Owner).COM_PORT;
                     mode = 1;  break;
                 case 2: // IM700
-                    sfp = new SC18IM700();
-                    sfp.port = ((MainWindow)this.Owner).COM_PORT;
+                    im700_sfp.port = ((MainWindow)this.Owner).COM_PORT;
                     mode = 2; break;
             }
 

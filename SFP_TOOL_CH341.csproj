@@ -10,6 +10,10 @@
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>manyCWDM4.jpg</PackageIcon>
     <ApplicationIcon>QSFP-EVB.ico</ApplicationIcon>
+    <BaseOutputPath></BaseOutputPath>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageReadmeFile></PackageReadmeFile>
+    <RepositoryUrl>https://github.com/smorikaw/SFP_TOOL_CH341_WPF</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

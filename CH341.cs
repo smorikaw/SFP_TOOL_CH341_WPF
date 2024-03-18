@@ -66,7 +66,7 @@ namespace SFP_TOOL_CH341
         [DllImport("./CH341DLLA64.DLL")]
         private static extern int CH341GetVerIC(long i);
         [DllImport("./CH341DLLA64.DLL")]
-        private static extern byte[] CH341GetDeviceName(long i);
+        private static extern IntPtr CH341GetDeviceName(long i);
         [DllImport("./CH341DLLA64.DLL")]
         private static extern int CH341ReadI2C(long i, int addr, byte off, ref byte b);
         [DllImport("./CH341DLLA64.DLL")]
@@ -83,7 +83,7 @@ namespace SFP_TOOL_CH341
             CH341SetStream(0, 1);       // 0=20Khz, 1=100Khz, 2=400Khz
         }
         // CH341のドライバーとchipのversionを調べる
-        public int getver(ref long dllVersion, ref long driverVersion, ref byte[] p, ref long icVersion)
+        public int getver(ref long dllVersion, ref long driverVersion, ref string str, ref long icVersion)
         {
             Console.Error.WriteLine("CH341.getver");
             long h = CH341OpenDevice(0);
@@ -95,7 +95,10 @@ namespace SFP_TOOL_CH341
             driverVersion = CH341GetDrvVersion(0);
 
             // Device Name
-            p = CH341GetDeviceName(0);
+            byte[] buf = new byte[256];
+            IntPtr p = CH341GetDeviceName(0);
+            Marshal.Copy((IntPtr)p, buf, 0, 4);
+            str = buf.ToString();
 
             // IC verison 0x10=CH341,0x20=CH341A,0x30=CH341A3
             icVersion = CH341GetVerIC(0);

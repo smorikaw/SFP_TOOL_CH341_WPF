@@ -38,6 +38,7 @@
             </MenuItem>
             <MenuItem Header="I2C">
                 <MenuItem Header="Read via CH341" Click="ReadI2C_Click"/>
+                <MenuItem Header="check CH341" Click="checkCH341_Click"/>
                 <MenuItem Header="DDM" Click="DDM_Click"/>
                 <Separator></Separator>
                 <MenuItem Header="Select serial port" Click="COMsel_Click"/>
