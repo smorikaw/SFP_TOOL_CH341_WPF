@@ -228,6 +228,51 @@ namespace SFP_TOOL_CH341
               }
             return s;
         }
+
+        // sff8024_table Table 4-8 Passive and Linear Active Copper Cable and Passive Loopback media interface codes
+        public static String dacint(int code)
+        {
+            String s = "";
+            switch (code)
+            {
+                case 0x01: s = "(Copper cable)"; break;
+                case 0xbf: s = "(Passive Loopback module)"; break;
+                default: s = ""; break;
+            }
+            return s;
+        }
+        // sff8024_table Table 4-9 Limiting and Retimed Active Cable assembly and Active Loopback media interface codes
+        public static String aocint(int code)
+        {
+            String s = "";
+            switch (code)
+            {
+                case 0x01: s = "(Active Cable assembly with BER < 10-12)"; break;
+                case 0x02: s = "(Active Cable assembly with BER < 5x10-5)"; break;
+                case 0x03: s = "(Active Cable assembly with BER < 2.6x10-4)"; break;
+                case 0x04: s = "(Active Cable assembly with BER < 10-6)"; break;
+                case 0xbf: s = "(Active Loopback module)"; break;
+                default: s = ""; break;
+            }
+            return s;
+        }
+        // sff8024_table Table 4-10 BASE-T media interface codes
+        public static String utpint(int code)
+        {
+            String s = "";
+            switch (code)
+            {
+                case 0x01: s = "(1000BASE-T)"; break;
+                case 0x02: s = "(2.5GBASE-T)"; break;
+                case 0x03: s = "(5GBASE-T)"; break;
+                case 0x04: s = "(10GBASE-T)"; break;
+                case 0x05: s = "(25GBASE-T)"; break;
+                case 0x06: s = "(40GBASE-T)"; break;
+                case 0x07: s = "(50GBASE-T)"; break;
+                default: s = ""; break;
+            }
+            return s;
+        }
         public static String optype(int code)
         {
             String s = "";

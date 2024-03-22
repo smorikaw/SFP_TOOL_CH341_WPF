@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -68,7 +69,7 @@ namespace SFP_TOOL_CH341
                 s += "Vendor DATE : " + SFP.nGet(ref w.PAGE00, 182, 8) + "\r\n";
                 s += "connector   : " + SFF8024.connector_type(w.PAGE00[203]) + "\r\n";
 
-                s += "Link Length : " + string.Format("{0}",  w.PAGE00[202]) + " km\r\n";
+                s += "Link Length : " + string.Format("{0:#,0}", LEN(w.PAGE00[202])) + " m\r\n";
                 s += "Media Lane  : " + string.Format("{0:B8}", w.PAGE00[210]) + "\r\n";
                 s += "Cable assy  : " + string.Format("{0:X2}", w.PAGE00[211]) + "\r\n";
                 s += "Media tech  : " + MTech(w.PAGE00[212]) + "\r\n";
@@ -78,13 +79,27 @@ namespace SFP_TOOL_CH341
 
                 for (i = 1; i <= APPC(w); i++)
                 {
-                    s += string.Format("APP HOST{0:D1}  : " ,i)+ APPHOST(i,w) + "\r\n";
-                    s += string.Format("APP MEDIA{0:D1} : " , i)+ APPMEDIA(i,w) + "\r\n";
-                    s += string.Format("APP LANE{0:D1}  : ", i) + APPLANE(i,w) + "\r\n";
-                    s += string.Format("APP OPTION{0:D1}: ", i) + APPOPT(i,w) + "\r\n";
-                }
+                    s += string.Format("{0:D1})Host ID   : ", i) + APPHOST(i,w) + "\r\n";
+                    s += string.Format("{0:D1})Media ID  : ", i) + APPMEDIA(i,w) + "\r\n";
+                    s += string.Format("{0:D1})Lane count: ", i) + APPLANE(i,w) + "\r\n";
+                    s += string.Format("{0:D1})Hlane Assign: ", i) + APPOPT(w.EEPROM[85 + (i * 4)]) + "\r\n";
+                    s += string.Format("{0:D1})Mlane Assign: ", i) + APPOPT(w.PAGE01[0xb0-1+i]) + "\r\n";
+            }
                 return s;
             }
+        // byte 202 Table 8-29 Cable Assembly Link Length (Page 00h)
+        public static float LEN(byte b)
+        {
+            float multi = 0.0F;
+            switch(0xc0 & b)
+            {
+                case 0x00: multi = 0.1F; break;
+                case 0x40: multi = 1.0F; break;
+                case 0x80: multi = 10.0F; break;
+                case 0xc0: multi = 100.0F; break;
+            }
+            return (multi * (0x3f & b));
+        }
         // -----------------------------------------------------------------------
             public static String pwrc(int code) {
                 string s = "";
@@ -208,8 +223,11 @@ namespace SFP_TOOL_CH341
 
                 switch (type)
                 {       // check SMF or MMF
-                    case 0x01: s = SFF8024.mmfint(code); break;
-                    case 0x02: s = SFF8024.smfint(code); break;
+                    case 0x01: s = SFF8024.mmfint(code); break; // Multimode separate transceiver
+                    case 0x02: s = SFF8024.smfint(code); break; // Singlemode separate transceiver
+                    case 0x03: s = SFF8024.dacint(code); break; // Passive copper cable
+                    case 0x04: s = SFF8024.aocint(code); break; // Active cable
+                    case 0x05: s = SFF8024.utpint(code); break; // BASE-T media
                     default: s = ""; break;
                 }
                 return s;
@@ -226,9 +244,9 @@ namespace SFP_TOOL_CH341
                         string.Format("{0:X2} : ",  (0xf0 & v)>>4) +
                         string.Format("{0:X2}",     (0x0f & v));
             }
-            public static string APPOPT(int i, MainWindow w) {
+            public static string APPOPT(int i) {
                 // PAGE[1]175+i]
-                return string.Format("({0:X2}) = ", w.PAGE01[175+i]) + string.Format("{0:B8}", w.PAGE01[175 + i]);
+                return string.Format("({0:X2}) = ", i) + string.Format("{0:B8}", i);
             }
 
 
