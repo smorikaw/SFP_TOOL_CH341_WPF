@@ -56,6 +56,7 @@ namespace SFP_TOOL_CH341
             
             return s;
         }
+        // SFF-8024 Table 4-1 Identifier Values
         // 0:SFF8472, 1:SFF8636, 2:CMIS
         public static int format_type(MainWindow w)
         {
@@ -66,9 +67,14 @@ namespace SFP_TOOL_CH341
                 case 0x0d:      // QSFP+
                 case 0x11:      // QSFP28
                           f = 1;  break;
+
                 case 0x18:      // QSFP-DD
                 case 0x19:      // OSFP
+                case 0x1e:      // QSFP+/QSFP28/QSFP112 CMIS
+                case 0x1f:      // SFP-DD CMIS
+                case 0x20:      // SFP+ CMIS format
                            f = 2; break;
+                default:   f = 0; break; //
             }
 
             return f; 
