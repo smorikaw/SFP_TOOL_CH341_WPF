@@ -25,14 +25,16 @@ namespace SFP_TOOL_CH341
     /// </summary>
     public partial class MainWindow : Window
     {
+        // EEPROM contents GLOBAL
         public byte[] EEPROM = new byte[256];
         public byte[] PAGE00 = new byte[256];
         public byte[] PAGE01 = new byte[256];
         public byte[] PAGE02 = new byte[256];
         public byte[] PAGE03 = new byte[256];
 
-        public string PN;
-        public string SN;
+        // Product name and file name GLOBAL for save file names
+        public string PN = "PN";
+        public string SN = "SN";
 
         public UInt32? COM_MODE = 0;
         public string COM_PORT = "COM3:";
@@ -46,7 +48,7 @@ namespace SFP_TOOL_CH341
             int len=0;
             // Configure load file dialog box
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = "EEPROM"; // Default file name
+            dialog.FileName = ""; // Default file name
             dialog.DefaultExt = ".bin"; // Default file extension
             dialog.Filter = "bin documents (.bin)|*.bin" +
                 "|json files|*.json" +
