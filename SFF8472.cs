@@ -169,12 +169,13 @@ namespace SFP_TOOL_CH341
                 s += "Power Class : " + pwrc(w.EEPROM[64]) + "\r\n";
                 s += "Vendor Name : " + SFP.nGet(ref w.EEPROM, 20, 16) + "\r\n";
                 s += "Vendor PN   : " + SFP.nGet(ref w.EEPROM, 40, 16) + "\r\n";
-
+                w.PN = SFP.nGet(ref w.EEPROM, 40, 16);
                 s += "Vendor OUI  : " + string.Format("{0:X2}:", w.EEPROM[37]) +
                                         string.Format("{0:X2}:", w.EEPROM[38]) +
                                         string.Format("{0:X2}", w.EEPROM[39]) + "\r\n";
                 s += "Vendor REV  : " + SFP.nGet(ref w.EEPROM, 56, 4) + "\r\n";
                 s += "Vendor SN   : " + SFP.nGet(ref w.EEPROM, 68, 16) + "\r\n";
+                w.SN = SFP.nGet(ref w.EEPROM, 68, 16);
                 s += "Vendor DATE : " + SFP.nGet(ref w.EEPROM, 84, 8) + "\r\n";
                 s += "connector   : " + SFF8024.connector_type(w.EEPROM[2]) + "\r\n";
                 s += "wavelength  : " + string.Format("{0:d} nm",(w.EEPROM[60] * 0x100 + w.EEPROM[61])) + "\r\n";

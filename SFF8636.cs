@@ -163,12 +163,13 @@ namespace SFP_TOOL_CH341
             s += "EXT Type    : " + SFF8024.exttype(w.PAGE00[192]) + "\r\n";
             s += "Vendor Name : " + SFP.nGet(ref w.PAGE00, 148, 16) + "\r\n";
             s += "Vendor PN   : " + SFP.nGet(ref w.PAGE00, 168, 16) + "\r\n";
-
+            w.PN = SFP.nGet(ref w.PAGE00, 168, 16);
             s += "Vendor OUI  : " + string.Format("{0:X2}:", w.PAGE00[165]) +
                                     string.Format("{0:X2}:", w.PAGE00[166]) +
                                     string.Format("{0:X2}", w.PAGE00[167]) + "\r\n";
             s += "Vendor REV  : " + SFP.nGet(ref w.PAGE00, 184, 2) + "\r\n";
             s += "Vendor SN   : " + SFP.nGet(ref w.PAGE00, 196, 16) + "\r\n";
+            w.SN = SFP.nGet(ref w.PAGE00, 196, 16);
             s += "Vendor DATE : " + SFP.nGet(ref w.PAGE00, 212, 8) + "\r\n";
             s += "connector   : " + SFF8024.connector_type(w.PAGE00[130]) + "\r\n";
 

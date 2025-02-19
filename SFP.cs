@@ -26,7 +26,7 @@ namespace SFP_TOOL_CH341
             // delete no ASCII char
             for (i = 0; i < len; i++)
             {
-                if (str[i] < 0x20 || str[i] > 0x7f) str[i] = (char)'.';
+                if (str[i] < 0x20 || str[i] > 0x7f) str[i] = (char)'?';
             }
             // strip space
             for (i = len - 1; i > 0; i--)

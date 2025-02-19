@@ -31,6 +31,9 @@ namespace SFP_TOOL_CH341
         public byte[] PAGE02 = new byte[256];
         public byte[] PAGE03 = new byte[256];
 
+        public string PN;
+        public string SN;
+
         public UInt32? COM_MODE = 0;
         public string COM_PORT = "COM3:";
 
@@ -106,9 +109,9 @@ namespace SFP_TOOL_CH341
             statusLabel.Content = "read I2C page00";
             ch341.read_upper(ref PAGE00, 0);
             textBox.Text += HEX_page00();
-            //   statusLabel.Content = "read I2C page01";
-            //   ch341.read_upper(ref PAGE01, 1);
-            //  textBox.Text += HEX_page01();
+            statusLabel.Content = "read I2C page01";
+            ch341.read_upper(ref PAGE01, 1);
+            textBox.Text += HEX_page01();
             //   statusLabel.Content = "read I2C page02";
             //   ch341.read_upper(ref PAGE02, 2);
 
@@ -188,13 +191,15 @@ namespace SFP_TOOL_CH341
         }
         //==========================================================
         //
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private void Save_bin_Click(object sender, RoutedEventArgs e)
         {
             // Configure save file dialog box
             var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.FileName = "EEPROM"; // Default file name
+            //  string v = PN + "-" + SN;
+            //  dialog.FileName = v; // Default file name
+            dialog.FileName = SN; // Default file name
             dialog.DefaultExt = ".bin"; // Default file extension
-            dialog.Filter = "bin documents (.bin)|*.bin"; // Filter files by extension
+            dialog.Filter = "bin documents (.bin)|*.bin|All files (*.*)|*.*"; // Filter files by extension
 
             // Show save file dialog box
             bool? result = dialog.ShowDialog();
@@ -210,9 +215,11 @@ namespace SFP_TOOL_CH341
         private void Save_json_Click(object sender, RoutedEventArgs e) {
             // Configure save file dialog box
             var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.FileName = "EEPROM"; // Default file name
-            dialog.DefaultExt = ".bin"; // Default file extension
-            dialog.Filter = "bin documents (.json)|*.json"; // Filter files by extension
+            //  string v = PN + "-" + SN;
+            //  dialog.FileName = v; // Default file name
+            dialog.FileName = SN; // Default file name
+            dialog.DefaultExt = ".json"; // Default file extension
+            dialog.Filter = "JSON documents (.json)|*.json|All files (*.*)|*.*"; // Filter files by extension
 
             // Show save file dialog box
             bool? result = dialog.ShowDialog();
@@ -224,6 +231,27 @@ namespace SFP_TOOL_CH341
                 string filename = dialog.FileName;
 
                 SaveToJsonFile(filename, this);
+            }
+        }
+        private void Save_text_Click(object sender, RoutedEventArgs e)
+        {
+            // Configure save file dialog box
+            var dialog = new Microsoft.Win32.SaveFileDialog();
+            //  string v = PN + "-" + SN;
+            //  dialog.FileName = v; // Default file name
+            dialog.FileName = SN; // Default file name
+            dialog.DefaultExt = ".txt"; // Default file extension
+            dialog.Filter = "text documents (.txt)|*.txt|All files (*.*)|*.*"; // Filter files by extension
+
+            // Show save file dialog box
+            bool? result = dialog.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
+            {
+                // Save document
+                string filename = dialog.FileName;
+                SaveToTextFile(filename, this);
             }
         }
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -379,6 +407,10 @@ namespace SFP_TOOL_CH341
             writer.Write(w.PAGE02, 0x80, 0x80);
             writer.Write(w.PAGE03, 0x80, 0x80);
             fs.Close();
+        }
+        public static void SaveToTextFile(string path, MainWindow w)
+        {
+            System.IO.File.WriteAllText(path, w.textBox.Text);
         }
         public static int LoadFromBinaryFile(string path, MainWindow w)
         {

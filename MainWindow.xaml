@@ -24,8 +24,9 @@
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click=" Open_Click"/>
                 <Separator></Separator>
-                <MenuItem Header="Save(*.bin)" Click="Save_Click"/>
+                <MenuItem Header="Save(*.bin)" Click="Save_bin_Click"/>
                 <MenuItem Header="Save(*.json)" Click="Save_json_Click"/>
+                <MenuItem Header="Save(*.txt)" Click="Save_text_Click"/>
                 <Separator></Separator>
                 <MenuItem Header="Quit" Click="Quit_Click"/>
             </MenuItem>
@@ -51,10 +52,13 @@
         </Menu>
 
 
-        <TextBox x:Name="textBox" AcceptsReturn="True"  VerticalScrollBarVisibility="Visible" MaxLines="100"
-                     Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="1"
-                     TextWrapping="Wrap"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.IsSharedSizeScope="True" 
-                     IsReadOnly="true" HorizontalScrollBarVisibility="Disabled" FontFamily="MS Gothic"/>
+        <TextBox x:Name="textBox" Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="1" Grid.IsSharedSizeScope="True" 
+                 VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                 VerticalContentAlignment="Stretch"
+                 IsReadOnly="true"
+                 AcceptsReturn="True" TextWrapping="Wrap"
+                 FontFamily="MS Gothic"/>
 
         <TextBox x:Name="modeText" Grid.Row="2" Grid.Column="0" Width="60" Grid.ColumnSpan="1" Background="LightGray"></TextBox>
         <StatusBar Grid.Row="2" Grid.Column="1" VerticalAlignment="Bottom" Grid.ColumnSpan="1" Grid.RowSpan="1">
