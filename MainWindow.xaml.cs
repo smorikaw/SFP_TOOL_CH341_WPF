@@ -125,10 +125,10 @@ namespace SFP_TOOL_CH341
             string name="";
             CH341 ch341 = new();
             ch341.getver(ref dllV, ref driverV, ref name, ref icV);
-            textBox.Text  = string.Format("dllVersion    : {0:D2}", dllV);
-            textBox.Text += string.Format("driverVersion : {0:D2}", driverV);
-            textBox.Text += string.Format("driverName    : {0:D2}", name);
-            textBox.Text += string.Format("icVersion     : {0:D2}", icV);
+            textBox.Text  = string.Format("dllVersion    : {0:D2}", dllV) + Environment.NewLine;
+            textBox.Text += string.Format("driverVersion : {0:D2}", driverV) + Environment.NewLine;
+            textBox.Text += string.Format("driverName    : {0:D2}", name) + Environment.NewLine;
+            textBox.Text += string.Format("icVersion     : {0:D2}", icV) + Environment.NewLine;
 
         }
         private void COMsel_Click(object sender, RoutedEventArgs e)
@@ -228,7 +228,8 @@ namespace SFP_TOOL_CH341
         }
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
-            textBox.Copy();
+            if (textBox.SelectionLength > 0)
+                textBox.Copy();
         }
         private void OnCtrlC(object sender, RoutedEventArgs e)
                         {

@@ -8,7 +8,7 @@
         Title="INFO Window" Height="200" Width="200" MinHeight="200" MinWidth="200" MaxHeight="200" MaxWidth="200">
     <Grid>
         <Label Content="SFP TOOL" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20"/>
-        <Label Content="version 2024/05/22" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,37,0,0"/>
+        <Label Content="version 2025/02/19" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,37,0,0"/>
         <Label Content="by morikawa@wavesplitter.com" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,60,0,0"/>
         <Label Content="-CH341 USB/I2C support" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,105,0,0"/>
         <Label Content="-USB-ISS USB/I2C support" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,120,0,0"/>

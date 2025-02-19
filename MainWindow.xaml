@@ -30,7 +30,7 @@
                 <MenuItem Header="Quit" Click="Quit_Click"/>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Copy" Click="Copy_Click"/>
+                <MenuItem Header="Copy" Click="Copy_Click" InputGestureText="Ctrl+C"/>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Font large" Click="FontLarge_Click"/>
@@ -50,11 +50,11 @@
             </MenuItem>
         </Menu>
 
- 
-            <TextBox x:Name="textBox" AcceptsReturn="True"  VerticalScrollBarVisibility="Visible"
+
+        <TextBox x:Name="textBox" AcceptsReturn="True"  VerticalScrollBarVisibility="Visible" MaxLines="100"
                      Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="1"
                      TextWrapping="Wrap"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.IsSharedSizeScope="True" 
-                     IsReadOnly="true" MaxLength="1000" HorizontalScrollBarVisibility="Disabled" FontFamily="MS Gothic"/>
+                     IsReadOnly="true" HorizontalScrollBarVisibility="Disabled" FontFamily="MS Gothic"/>
 
         <TextBox x:Name="modeText" Grid.Row="2" Grid.Column="0" Width="60" Grid.ColumnSpan="1" Background="LightGray"></TextBox>
         <StatusBar Grid.Row="2" Grid.Column="1" VerticalAlignment="Bottom" Grid.ColumnSpan="1" Grid.RowSpan="1">

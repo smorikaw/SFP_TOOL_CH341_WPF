@@ -58,7 +58,7 @@ namespace SFP_TOOL_CH341
             // 22-23 : Aux3MonValtage
             s += "FW Revision : " + string.Format("{0}.", w.EEPROM[39]) + string.Format("{0}", w.EEPROM[40]) + "\r\n";
             // page 00    
-            s += "Power Class : " + pwrc(w.PAGE00[200]) + "\r\n";
+            s += "Power Class : " + pwrc(w.PAGE00[200]) + string.Format(" {0:F2}W", w.PAGE00[201] * 0.25)+"\r\n";
             s += "Vendor VN   : " + SFP.nGet(ref w.PAGE00, 129, 16) + "\r\n";
             s += "Vendor PN   : " + SFP.nGet(ref w.PAGE00, 148, 16) + "\r\n";
             s += "Vendor OUI  : " + string.Format("{0:X2}:", w.PAGE00[145])+
@@ -260,7 +260,7 @@ namespace SFP_TOOL_CH341
                 return mint(v, w.EEPROM[85]);
             }
         public static string APPLANE(int i, MainWindow w) {
-            int v;
+            int v=0;
             if (i > 8) 
                 {
                     v = w.PAGE01[223+2 + ((i - 9) * 4)];
