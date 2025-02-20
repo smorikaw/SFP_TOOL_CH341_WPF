@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Markup;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using String = System.String;
 
 namespace SFP_TOOL_CH341
 {
@@ -76,7 +81,7 @@ namespace SFP_TOOL_CH341
             s += "Cable assy  : " + string.Format("{0:X2}", w.PAGE00[211]) + "\r\n";
             s += "Media tech  : " + MTech(w.PAGE00[212]) + "\r\n";
                 
-                int i;
+                int i,cc;
 
             for (i = 1; i <= APPC(w); i++)
             {
@@ -88,6 +93,40 @@ namespace SFP_TOOL_CH341
            //     s += string.Format("{0:D1})Hlane Assign: ", i) + APPOPT(w.EEPROM[85 + (i * 4)]) + "\r\n";
            //     s += string.Format("{0:D1})Mlane Assign: ", i) + APPOPT(w.PAGE01[0xb0-1+i]) + "\r\n";
             }
+            //8.3.10 Page 00h Page Checksum (required) 2
+            //The page checksum is a one - byte code that can be used to verify that the read-only static data
+            //on Page 00h is 3 valid.The page checksum value shall be the low order 8 bits of the arithmetic
+            //sum of all byte values from byte 4 128 to byte 221, inclusive.
+            cc = 0;
+            for (i = 128; i < 221; i++)
+            {
+                cc += w.PAGE00[i];
+            }
+            s += "Page00 checksum : " + string.Format("{0:X4}", cc) 
+                                      + string.Format(" vs {0:X2}", w.PAGE00[222])  + "\r\n";
+            // 8.4.15 Page Checksum (Page 01h, Byte 255, RO RQD) 1
+            // The Page Checksum is a one - byte code that can be used to verify that the read-only static data
+            // on Page 01h is 2 valid.The checksum code shall be the low order 8 bits of the arithmetic sum of
+            // all byte values from byte 130 to byte 254, inclusive.
+            cc = 0;
+            for (i=130; i < 254; i++)
+            {
+                cc += w.PAGE01[i];
+            }
+            s += "Page01 checksum : " + string.Format("{0:X4}", cc)
+                                       +string.Format(" vs {0:X2}", w.PAGE01[255]) + "\r\n";
+            // 8.5.3 Page Checksum (Page 02h, Byte 255, RO RQD) 7
+            // The Page Checksum code is a one - byte code that can be used to verify that the device property
+            // information in 8 the module is valid.The Page Checksum code shall be the low order 8 bits of
+            // the arithmetic sum of all byte 9 values from byte 128 to byte 254, inclusive.
+            cc = 0;
+            for (i = 128; i < 254; i++)
+            {
+                cc += w.PAGE02[i];
+            }
+            s += "Page02 checksum : " + string.Format("{0:X4}", cc)
+                                      + string.Format(" vs {0:X2}", w.PAGE02[255]) + "\r\n"; 
+
             return s;
         }
         // byte 202 Table 8-29 Cable Assembly Link Length (Page 00h)

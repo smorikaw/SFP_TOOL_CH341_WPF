@@ -418,6 +418,7 @@ namespace SFP_TOOL_CH341
         {
             FileInfo file = new FileInfo(path);
             int len = (int)file.Length;
+            w.modeText.Text = string.Format("len{0}",len);
             FileStream fs = new FileStream(path,
                 FileMode.Open,
                  FileAccess.Read);
@@ -431,9 +432,9 @@ namespace SFP_TOOL_CH341
             }
             if (0x80 < len) reader.Read(w.PAGE00, 0x80, 0x80);
 //            if (0x100 < (len)) reader.Read(w.PAGE00, 0x80, 0x80);
-            if (0x180 < (len)) reader.Read(w.PAGE01, 0x80, 0x80);
-            if (0x200 < (len)) reader.Read(w.PAGE02, 0x80, 0x80);
-            if (0x280 < (len)) reader.Read(w.PAGE03, 0x80, 0x80);
+            if (0x180 <= (len)) reader.Read(w.PAGE01, 0x80, 0x80);
+            if (0x200 <= (len)) reader.Read(w.PAGE02, 0x80, 0x80);
+            if (0x280 <= (len)) reader.Read(w.PAGE03, 0x80, 0x80);
             fs.Close();
             // 前半の128byteエリアは使わない
             /*
@@ -453,10 +454,12 @@ namespace SFP_TOOL_CH341
         private void FontLarge_Click(object sender, RoutedEventArgs e)
         {
             textBox.FontSize += 2;
+            this.modeText.Text = string.Format("set{0}", textBox.FontSize);
         }
         private void FontSmall_Click (object sender, RoutedEventArgs e)
         {
             textBox.FontSize -= 2;
+            this.modeText.Text = string.Format("set{0}", textBox.FontSize);
         }
     }//// end of class define
     class SFP_EEPROM
