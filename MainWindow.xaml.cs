@@ -80,7 +80,7 @@ namespace SFP_TOOL_CH341
                 // HEX dump
                 //
                 textBox.Text = HEX_lower();
-                textBox.Text += HEX_page00();
+                if (len > 0x80 ) textBox.Text += HEX_page00();
                 if (len > 0x100) textBox.Text += HEX_page01();
                 if (len > 0x180) textBox.Text += HEX_page02();
                 if (len > 0x200) textBox.Text += HEX_page03();
@@ -388,13 +388,18 @@ namespace SFP_TOOL_CH341
         public static void LoadFromJsonFile(string path, MainWindow w)
         {
             string buf = System.IO.File.ReadAllText(path);
-            SFP_EEPROM data = JsonSerializer.Deserialize<SFP_EEPROM>(buf);
-            w.EEPROM = data.upper;
-            w.PAGE00 = data.page00;
-            w.PAGE01 = data.page01;
-            w.PAGE02 = data.page02;
-            w.PAGE03 = data.page03;
-
+            SFP_EEPROM? data = JsonSerializer.Deserialize<SFP_EEPROM>(buf);
+            if (data == null)
+            {
+                Console.WriteLine("can't decode JSON\n");
+            }
+            else {
+                w.EEPROM = data.upper ?? new byte[256];
+                w.PAGE00 = data.page00 ?? new byte[256];
+                w.PAGE01 = data.page01 ?? new byte[256];
+                w.PAGE02 = data.page02 ?? new byte[256];
+                w.PAGE03 = data.page03 ?? new byte[256];
+            }
         }
         public static void SaveToBinaryFile(string path, MainWindow w)
         {

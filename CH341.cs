@@ -98,7 +98,7 @@ namespace SFP_TOOL_CH341
             byte[] buf = new byte[256];
             IntPtr p = CH341GetDeviceName(0);
             Marshal.Copy((IntPtr)p, buf, 0, 4);
-            str = buf.ToString();
+            str = Encoding.ASCII.GetString(buf, 0, 4); // 修正: バイト配列を文字列に変換
 
             // IC verison 0x10=CH341,0x20=CH341A,0x30=CH341A3
             icVersion = CH341GetVerIC(0);

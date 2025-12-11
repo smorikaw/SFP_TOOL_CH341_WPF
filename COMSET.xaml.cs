@@ -44,6 +44,10 @@ namespace SFP_TOOL_CH341
         {
             try
             {
+                if (serialPort == null)
+                {
+                    serialPort = new SerialPort();
+                }
                 serialPort.PortName = COM_PORT;        //選択したport名
        //       serialPort.BaudRate = baudrate;        //選択したbaudrate
                 serialPort.BaudRate = 9600;            //選択したbaudrate
@@ -65,7 +69,10 @@ namespace SFP_TOOL_CH341
         {
             try
             {
-                serialPort.Close();
+                if (serialPort != null && serialPort.IsOpen)
+                {
+                    serialPort.Close();
+                }
             }
             catch (Exception ex)
             {

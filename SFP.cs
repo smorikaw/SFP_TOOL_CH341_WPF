@@ -61,9 +61,12 @@ namespace SFP_TOOL_CH341
         public static int format_type(MainWindow w)
         {
             int f=0;
-            if (0x03 == w.EEPROM[0x00]) return 0; // SFP/SFP+/SFP28/
-            switch (w.PAGE00[0x80])
+            //    if (0x03 == w.EEPROM[0x00]) return 0; // SFP/SFP+/SFP28/
+            //   switch (w.PAGE00[0x80])
+            switch (w.EEPROM[0x00])
             {
+                case 0x03:      //
+                            f = 0;  break;
                 case 0x0d:      // QSFP+
                 case 0x11:      // QSFP28
                           f = 1;  break;

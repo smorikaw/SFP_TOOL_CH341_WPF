@@ -142,6 +142,16 @@ namespace SFP_TOOL_CH341
             return false;
         }
         //
+        // Table 6-29 Equalizer, Emphasis, Amplitude and Timing (Page 03h Bytes 224-229)
+        // bit 7 :Controllable Host-Side FEC support
+        // bit 6 :Controllable Media-Side FEC support
+        public static string media_FEC(MainWindow w)
+        {
+            string s = "";
+            //    w.PAGE03[227];
+            return s;
+        }
+        //
         // main decode table
         //
         public static String decode(MainWindow w)

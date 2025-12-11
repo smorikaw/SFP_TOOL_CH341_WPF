@@ -47,7 +47,8 @@ namespace SFP_TOOL_CH341
             String s = "";
 
             s = "---------- CMIS -------\r\n";
-            s += "Identifer   : " + SFF8024.ident(w.PAGE00[0x80]) + "\r\n";
+//            s += "Identifer   : " + SFF8024.ident(w.PAGE00[0x80]) + "\r\n";
+            s += "Identifer   : " + SFF8024.ident(w.EEPROM[0]) + "\r\n";
             s += "CMIS Rev    : " + string.Format("{0:X2}", w.EEPROM[1]) + "\r\n";
             //  2 : support config
             //  3 : module state
