@@ -13,7 +13,7 @@ namespace SFP_TOOL_CH341
         public static String nGet(ref byte[] data, int addr, int len)
         {
             int i, j;
-            char[] str = new char[256+1];
+            char[] str = new char[len+1];
 
             j = 0;
             for (i = addr; j < len; i++)
@@ -29,10 +29,10 @@ namespace SFP_TOOL_CH341
                 if (str[i] < 0x20 || str[i] > 0x7f) str[i] = (char)'?';
             }
             // strip space
-            for (i = len - 1; i > 0; i--)
-            {
-                if (str[i] == 0x20) str[i] = (char)0x00;
-            }
+           // for (i = len - 1; i > 0; i--)
+           // {
+           //     if (str[i] == 0x20) str[i] = (char)0x00;
+           // }
             return new string(str);
             //return String.Format("{0}",str);
         }
